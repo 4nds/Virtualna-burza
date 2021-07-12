@@ -1,0 +1,80 @@
+
+body{
+	margin: 0px;
+    background-image: url(https://wallpaperaccess.com/full/1393718.jpg);
+}
+
+.box{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+}
+
+.header{
+    margin-bottom: 50px;
+    color: white;
+    font-size: 200%;
+}
+
+.header h1 span{
+    color: #000000 !important;
+}
+
+input{
+    margin-bottom: 20px;
+    border-radius: 12px;
+    font-size: 200%;
+    border: 3px solid black;
+}
+
+#login-input {
+    float: left;
+    position: absolute;
+    cursor: pointer;
+}
+
+#signup-input {
+    float: right;
+    position: right;
+    cursor: pointer;
+}
+
+password{
+    margin-bottom: 20px;
+    font-size: 200%;
+}
+
+input[type=text] {
+    background-color: transparent;
+    border: 3px solid black;
+    color: black;
+}
+
+input[type=text]:hover {
+    background-color: white;
+}
+
+input[type=password]:hover {
+    background-color: white;
+}
+
+input[type=password] {
+    background-color: transparent;
+    border: 3px solid black;
+    color: black;
+}
+
+input[type=submit] {
+    cursor: pointer;
+}
+
+input[type=submit]:hover {
+    background-color: white;
+}
+
+p{
+    font-size:150%;
+}

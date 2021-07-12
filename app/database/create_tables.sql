@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS vb_administratori (
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	korisnicko_ime VARCHAR(20) NOT NULL,
 	lozinka VARCHAR(255) NOT NULL,
-	početni_kapital INT,
+	pocetni_kapital INT,
 	vrijeme_postavljanja_kapitala DATETIME,
 	komisija FLOAT,
 	vrijeme_postavljanja_komisije DATETIME

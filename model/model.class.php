@@ -65,10 +65,13 @@ class Model {
 		return self::$primary_key_names[$static_class];
 	}
 
-	public static function all() {
+	public static function all($options = []) {
+		$select_string = 'SELECT * FROM t:table';
+		$params = ['table' => static::$table];		
+		$select_string = self::maybeAddOrderAndLimit($select_string, $params, $options);
 		$db = DB::getConnection();
-		$st = $db->dPrepare('SELECT * FROM t:table');
-		$st->execute(['table' => static::$table]);
+		$st = $db->dPrepare($select_string);
+		$st->execute($params);
 		$list = [];
 		while ($row = $st->fetch(PDO::FETCH_ASSOC)) {
 			$list[] = new static($row);
@@ -76,7 +79,7 @@ class Model {
 		return $list;
 	}
 
-	public static function find($primary_key) {
+	public static function find($primary_key) {		
 		$db = DB::getConnection();
 		$st = $db->dPrepare('SELECT * FROM t:table' .
 			' WHERE c:primary_key_name=:primary_key LIMIT 1');
@@ -87,14 +90,40 @@ class Model {
 			return new static($row);
 		}
 	}
+	
+	protected static function maybeAddOrderAndLimit($select_string, &$params, $options) {
+		$order_string = '';
+		if (array_key_exists('order by', $options)) {
+			$order_string = ' ORDER BY c:order_column_name';
+			$params['order_column_name'] = $options['order by'];
+		} else if (array_key_exists('asc order by', $options)) {
+			$order_string = ' ORDER BY c:order_column_name';
+			$params['order_column_name'] = $options['asc order by'];
+		} else if (array_key_exists('desc order by', $options)) {
+			$order_string = ' ORDER BY c:order_column_name DESC';
+			$params['order_column_name'] = $options['desc order by'];
+		}		
+		$limit_string = '';
+		if (array_key_exists('limit', $options)) {
+			$limit_string = ' LIMIT :limit';
+			$params['limit'] = $options['limit'];
+		}
+		$select_string .= $order_string . $limit_string;
+		return $select_string;
+	}
 
-	public static function where($column_name, $column_value) {
-		$db = DB::getConnection();
-		$st = $db->dPrepare('SELECT * FROM t:table' .
-			' WHERE c:column_name=:column_value');
-		$st->execute(['table' => static::$table,
+	public static function where($column_name, $column_value, $options = []) {			
+		$select_string = 'SELECT * FROM t:table' .
+			' WHERE c:column_name=:column_value';
+		$params = [
+			'table' => static::$table,
 			'column_name' => $column_name,
-			'column_value' => $column_value]);
+			'column_value' => $column_value
+		];
+		$select_string = self::maybeAddOrderAndLimit($select_string, $params, $options);
+		$db = DB::getConnection();
+		$st = $db->dPrepare($select_string);
+		$st->execute($params);
 		$list = [];
 		while ($row = $st->fetch(PDO::FETCH_ASSOC)) {
 			$list[] = new static($row);
@@ -137,7 +166,7 @@ class Model {
 		return [$select_string, $params];
 	}
 
-	protected function getSelectStringAndParams($model_name, $options) {
+	protected function getSelectStringAndParamsWithMaybeForeign($model_name, $options) {
 		if (in_array('foreign keys', $options)) {
 			list($select_string, $params) = 
 				$this->getForeignSelectStringAndParams($model_name);
@@ -191,7 +220,7 @@ class Model {
 		$db = DB::getConnection();
 		$primary_key_name = self::getPrimaryKeyName();
 		list($select_string, $params) = 
-			$this->getSelectStringAndParams($model_name, $options);
+			$this->getSelectStringAndParamsWithMaybeForeign($model_name, $options);
 		$query = $select_string . 
 			' WHERE c:requested_foreign_key_name=:requested_foreign_key';
 		$params['requested_foreign_key_name'] = $requested_foreign_key_name;
@@ -241,8 +270,7 @@ class Model {
 		$primary_key_name = self::getPrimaryKeyName();
 		$params['primary_key_name'] = $primary_key_name;
 		$params['primary_key'] = $this->$primary_key_name;
-		$st->execute($params);
-		$updated = $st->fetch(PDO::FETCH_ASSOC);
+		$updated = $st->execute($params);
 		return $updated;
 	}
 	
@@ -272,8 +300,7 @@ class Model {
 		$st = $db->dPrepare('INSERT INTO t:table (' . $insert_string . ')' .
 			' VALUES (' . $values_string . ')');
 		$params['table'] = static::$table;
-		$st->execute($params);
-		$inserted = $st->fetch(PDO::FETCH_ASSOC);
+		$inserted = $st->execute($params);
 		return $inserted;
 	}
 

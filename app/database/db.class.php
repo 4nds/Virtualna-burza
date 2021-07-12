@@ -71,8 +71,8 @@ class DynamicPDOStatement {
 			if (! isset($this->st)) {
 				$this->st = $this->prepare($params);
 			}
-			pprint($this->query, ['name', 'color' => 'blue']);
-			if (! empty($params)) pprint($params, ['name', 'json', 'color' => 'blue']);
+			//pprint($this->query, ['name', 'color' => 'blue']);
+			//if (! empty($params)) pprint($params, ['name', 'json', 'color' => 'blue']);
 			return $this->st->execute($params);
 		} catch (PDOException $e) {
 			raiseErrorAndExit('PDO error', $e->getMessage());
