@@ -5,6 +5,7 @@ if(! isset($_SESSION)) {
 }
 
 require_once __DIR__ . '/../app/debug.php';
+require_once __DIR__ . '/../model/korisnik.class.php';
 
 
 
@@ -13,7 +14,9 @@ class KorisnikController {
 	public function index() {
 		$username = $this->checkLogin();
 		if ($username) {
-			//$css_link = 'view/korisnik.css';
+			$korisnik = Korisnik::where('korisnicko_ime', $username, ['limit' => 1])[0];
+			$css_link = 'view/korisnik.css';
+			$js_links = ['https://www.gstatic.com/charts/loader.js', 'controller/korisnik.js'];
 			require_once __DIR__ . '/../view/korisnik_index.php';
 		} else {
 			$this->gotoLogin();

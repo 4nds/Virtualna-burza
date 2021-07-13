@@ -1,0 +1,201 @@
+body {
+	font-size: 18px;
+	background-color: rgb(191, 201, 208);
+}
+
+#stock_tabs {
+	display: flex;
+	grid-area: stock_tabs;
+}
+
+.stock_tab {
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+	width: 8em;
+}
+
+.stock_tab button {
+	display: grid;
+	grid-template-columns: 1em 1fr 1em;
+	grid-template-areas:
+		".  stock_tab_text  stock_tab_exit";
+	padding-right: 0px;
+	padding-left: 0px;
+	width: 98%;
+	font-size: 1em;
+}
+
+.stock_tab_text {
+	grid-area: stock_tab_text;
+}
+
+.stock_tab_exit {
+	grid-area: stock_tab_exit;
+	color: #E81123;
+	font-size: 1em;
+}
+
+
+#search_container {
+	display: flex;
+	grid-area: search;
+	justify-content: center;
+	align-items: flex-end;
+	
+}
+
+#search_input {
+	width: 100%;
+	font-size: 1em;
+}
+
+#search_input::placeholder {
+	font-size: 0.8em;
+}
+
+header {
+	display: grid;
+	grid-area: header;
+	grid-template-columns: 1fr 8em;
+	grid-template-areas:
+		"stock_tabs  search";
+	border-bottom: 2px solid #555555;
+}
+
+#left_sidebar {
+	grid-area: left_sidebar;
+	padding-top: 1em;
+	background-color: #F1F3F4;
+}
+
+#username_container {
+	display: grid;
+	grid-area: username;
+	grid-template-areas:
+		"username_left"
+		"username_right";
+}
+
+#username_left_text {
+	grid-area: username_left;
+	font-size: 1em;
+}
+
+#username_right_text {
+	grid-area: username_right;
+	font-size: 1em;
+	text-align: right;
+}
+
+#capital_container {
+	display: grid;
+	grid-area: capital;
+	grid-template-areas:
+		"capital_left"
+		"capital_right";
+}
+
+#capital_left_text {
+	grid-area: capital_left;
+	font-size: 1em;
+}
+
+#capital_right_text{
+	grid-area: capital_right;
+	font-size: 1em;
+	text-align: right;	
+}
+
+#logout_container {
+	display: flex;
+	grid-area: logout;
+	justify-content: center;
+	align-items: flex-end;
+}
+
+#logout_container form {
+	min-width: 90%;
+}
+
+#logout_button {
+	width: 100%;
+	font-size: 1em;
+
+}
+
+#right_sidebar {
+	display: grid;
+	grid-area: right_sidebar;
+	grid-template-columns: 1em 8em 1em;
+	grid-template-rows: 3em 3em 3em;
+	grid-template-areas:
+		".  username  ."
+		".  capital   ."
+		".  logout    .";
+	padding-top: 1em;
+	background-color: #F1F3F4;
+	
+}
+
+main {
+	display: grid;
+	grid-area: content;
+	grid-template-areas:
+		". chart .";
+	grid-template-columns: 1fr minmax(min-content, 1000px) 1fr;
+	/*background-color: red;*/
+}
+
+#stock_chart_container {
+	grid-area: chart;
+}
+
+.charts {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+}
+
+.chart_container {
+	position: relative;
+	display: inline-block; /* shrink wrap */
+	height: min(40vh, 50vw);
+	margin: 2vh;
+}
+
+.year_chart_container > img {
+	height: 62.5%;
+}
+
+.month_chart_container > img {
+	height: 50%;
+}
+
+.day_chart_container > img {
+	height: 75%;
+}
+
+.chart {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+footer {
+	grid-area: footer;
+}
+
+#container {
+	display: grid;
+	grid-template-columns: 10em 1fr 10em;
+    grid-template-areas:
+		".            header   ."
+		"left_sidebar content  right_sidebar"
+		".            footer   .";
+	row-gap: 1em;
+}
+

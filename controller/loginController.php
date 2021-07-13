@@ -9,7 +9,6 @@ require_once __DIR__ . '/../app/database/db.class.php';
 require_once __DIR__ . '/../app/debug.php';
 require_once __DIR__ . '/../model/korisnik.class.php';
 require_once __DIR__ . '/../model/administrator.class.php';
-require_once __DIR__ . '/korisnikController.php';
 
 
 
