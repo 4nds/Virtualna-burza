@@ -71,7 +71,7 @@ class StockChart {
 	}
 	
 	async getIexIntradayPrices() {
-		const url = `https://sandbox.iexapis.com/stable/stock/${this.symbol}/intraday-prices?token=Tsk_846d0b9fb89741c583b142ee2f9bb434&filter=${this.filter.join(',')}&chartInterval=${this.chart_interval}`
+		const url = `https://sandbox.iexapis.com/stable/stock/${this.symbol}/intraday-prices?token=Tsk_846d0b9fb89741c583b142ee2f9bb434&filter=${this.filter.join(',')}&chartInterval=${this.chart_interval}`;
 		console.log(url);
 		const data_array = await this.getIexPricesFromUrl(url);
 		return data_array;
@@ -96,14 +96,14 @@ class StockChart {
 		let i, j, start, end, range, k;
 		for (let col = 1; col < data_array[0].length; col++) {
 			i = 0;
-			while (i < data_array.length && data_array[i][col] === null) {
+			while (i < data_array.length && ! data_array[i][col]) {
 				i++;
 			}
 			while (i < data_array.length) {
-				if (data_array[i][col] === null) {
+				if (! data_array[i][col]) {
 					start = i - 1;
 					end = i + 1;
-					while (end < data_array.length && data_array[end][col] === null) {
+					while (end < data_array.length && ! data_array[end][col]) {
 						end++;
 					}
 					if (end < data_array.length) {
@@ -247,36 +247,50 @@ function currentTime() {
 	return Math.floor((new Date()).getTime() / 1000);
 }
 
-function setCharts(stock_tick, stock_sections, stock_chart_container, REFRESH_INTERVAL) {
+async function setCharts(stock_tick, stock_sections, REFRESH_INTERVAL) {
+	const stock_chart_container = document.querySelector('#stock_chart_container');
+	const transaction_container = document.querySelector('#transaction_container');
+	const price_span = document.querySelector('#price_span');
 	stock_sections.forEach(lstock_section => 
 		lstock_section.style.display = 'none');
+	console.log(stock_tick);
 	if (stock_sections.has(stock_tick)) {
-		if (Number(stock_sections.get(stock_tick).dataset.created) < 
+		if (Number(stock_sections.get(stock_tick).dataset.created) >
 				currentTime() - REFRESH_INTERVAL) {		
 			const stock_section = stock_sections.get(stock_tick);
 			const stock_section_style_width = stock_section.style.width;
 			stock_section.style.width = '0px';
-			stock_section.display = '';
-			stock_section.style.width = stock_section_style_width;	
-			return
+			stock_section.style.display = '';
+			stock_section.style.width = stock_section_style_width;
+			console.log(stock_section);
+			return;
 		} else {
 			stock_sections.get(stock_tick).remove();
 			stock_sections.delete(stock_tick);
 		}
 	}
 	const [stock_section, year_chart, month_chart, day_chart] =
-		createCharts("twtr");
-	year_chart.draw();
-	month_chart.draw();
-	day_chart.draw();			
+		createCharts(stock_tick);
+		
 	window.addEventListener('resizeend', event => {
 		year_chart.draw();
 		month_chart.draw();
 		day_chart.draw();
 	});
+	
 	stock_chart_container.append(stock_section);
 	stock_section.dataset.created = currentTime();
 	stock_sections.set(stock_tick, stock_section);
+		
+	year_chart.draw();
+	month_chart.draw();
+	await day_chart.draw();			
+	
+	console.log('');
+	const price = day_chart.data.cache[day_chart.data.cache.length - 1][3].Me;
+	const price_without_commas = price.replaceAll(',', '');
+	price_span.textContent = price_without_commas;
+	transaction_container.display = '';
 }
 
 
@@ -294,7 +308,6 @@ function main() {
 	
 	const search_input = document.querySelector('#search_input');
 	const stock_tabs_div = document.querySelector('#stock_tabs');
-	const stock_chart_container = document.querySelector('#stock_chart_container');
 	const stock_sections = new Map();
 	const REFRESH_INTERVAL = 60;
 	search_input.disabled = false;
@@ -305,7 +318,7 @@ function main() {
 			.querySelector('.stock_tab_text');
 		const stock_tick = stock_tab_text_span.textContent.toLowerCase();
 		
-		setCharts(stock_tick, stock_sections, stock_chart_container, REFRESH_INTERVAL);
+		setCharts(stock_tick, stock_sections, REFRESH_INTERVAL);
 	}
 
 
@@ -318,6 +331,11 @@ function main() {
 			const stock_tab_div_length = stock_tabs[0].getBoundingClientRect().width;
 			const stock_tabs_length = stock_tabs.length * stock_tab_div_length;
 			if (stock_tabs_div_length - stock_tabs_length < stock_tab_div_length) {
+				const stock_tab_text_span = stock_tabs[0]
+					.querySelector('.stock_tab_text');
+				const stock_tick = stock_tab_text_span.textContent.toLowerCase();
+				stock_sections.get(stock_tick).remove();
+				stock_sections.delete(stock_tick);
 				stock_tabs[0].remove();
 			}
 			
@@ -326,7 +344,7 @@ function main() {
 			const new_stock_tab_button = document.createElement('button');
 			const new_stock_tab_text_span = document.createElement('span');
 			new_stock_tab_text_span.classList.add('stock_tab_text');
-			new_stock_tab_text_span.textContent = stock_tick;
+			new_stock_tab_text_span.textContent = stock_tick.toUpperCase();;
 			new_stock_tab_button.append(new_stock_tab_text_span);
 			const new_stock_tab_exit_span = document.createElement('span');
 			new_stock_tab_exit_span.classList.add('stock_tab_exit');
@@ -335,7 +353,7 @@ function main() {
 			new_stock_tab_div.append(new_stock_tab_button);
 			stock_tabs_div.append(new_stock_tab_div);
 			
-			setCharts(stock_tick, stock_sections, stock_chart_container, REFRESH_INTERVAL);		
+			setCharts(stock_tick, stock_sections, REFRESH_INTERVAL);		
 		}
 	});
 
@@ -344,6 +362,11 @@ function main() {
 		const stock_tab_exit_span = event.target.closest('.stock_tab_exit');
 		if (stock_tab_exit_span) {
 			const stock_tab_div = stock_tab_exit_span.parentNode.parentNode;
+			const stock_tab_text_span = stock_tab_div
+					.querySelector('.stock_tab_text');
+			const stock_tick = stock_tab_text_span.textContent.toLowerCase();
+			stock_sections.get(stock_tick).remove();
+			stock_sections.delete(stock_tick);
 			stock_tab_div.remove();
 		} else {
 			const stock_tab_button = event.target.closest('.stock_tab button');
@@ -352,7 +375,7 @@ function main() {
 					.querySelector('.stock_tab_text');
 				const stock_tick = stock_tab_text_span.textContent.toLowerCase();
 				
-				setCharts(stock_tick, stock_sections, stock_chart_container, REFRESH_INTERVAL);
+				setCharts(stock_tick, stock_sections, REFRESH_INTERVAL);
 			}
 		}
 		
@@ -361,4 +384,5 @@ function main() {
 }
 
 document.querySelector('#search_input').disabled = true;
+document.querySelector('#transaction_container').display = 'none';
 google.charts.setOnLoadCallback(main);

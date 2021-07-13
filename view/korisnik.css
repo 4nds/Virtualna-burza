@@ -138,19 +138,6 @@ header {
 	
 }
 
-main {
-	display: grid;
-	grid-area: content;
-	grid-template-areas:
-		". chart .";
-	grid-template-columns: 1fr minmax(min-content, 1000px) 1fr;
-	/*background-color: red;*/
-}
-
-#stock_chart_container {
-	grid-area: chart;
-}
-
 .charts {
 	display: flex;
 	flex-wrap: wrap;
@@ -185,8 +172,72 @@ main {
 	right: 0;
 }
 
+#stock_chart_container {
+	grid-area: chart;
+}
+
+#price_container {
+	display: flex;
+	grid-area: price;
+	justify-content: center;
+	gap: 1em;
+}
+
+#quantity_container {
+	display: flex;
+	grid-area: quantity;
+	justify-content: center;
+	gap: 1em;
+}
+
+#quantity_input {
+	width: 5em;
+}
+
+#buy_container {
+	display: flex;
+	grid-area: buy;
+	justify-content: center;
+}
+
+#buy_button {
+	width: 8em;
+}
+
+#sell_container {
+	display: flex;
+	grid-area: sell;
+	justify-content: center;
+}
+
+#sell_button {
+	width: 8em;
+}
+
+#transaction_container {
+	display: grid;
+	grid-area: transaction;
+	grid-template-columns: 1fr 10em 10em 1fr;
+    grid-template-areas:
+		". price  quantity  ."
+		". buy    sell      .";
+	row-gap: 1em;
+}
+
+main {
+	display: grid;
+	grid-area: content;
+	grid-template-columns: 1fr minmax(min-content, 1000px) 1fr;
+	grid-template-areas:
+		". chart       ."
+		". transaction .";
+	row-gap: 2em;
+	/*background-color: red;*/
+}
+
 footer {
 	grid-area: footer;
+	height: 5em;
 }
 
 #container {
