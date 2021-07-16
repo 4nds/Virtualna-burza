@@ -44,13 +44,13 @@ class LoginController {
 	
 	public function signupFailed() {
 		$css_link = 'view/login.css';
-		$failure_message  = 'Registrancija nije bila uspješna.';
+		$failure_message  = 'Registracija nije bila uspješna.';
 		require_once __DIR__ . '/../view/login_failed.php';
 	}
 	
 	public function signupFailedUsernameTaken() {
 		$css_link = 'view/login.css';
-		$failure_message  = 'Uneseno korsničko ime već postoji.';
+		$failure_message  = 'Uneseno korisničko ime već postoji.';
 		require_once __DIR__ . '/../view/login_failed.php';
 	}
 	

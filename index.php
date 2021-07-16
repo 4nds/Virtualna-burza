@@ -6,7 +6,6 @@
 
 require_once __DIR__ . '/app/debug.php';
 
-$x = '1';
 
 $default_controller = 'login';
 $default_action = 'index';

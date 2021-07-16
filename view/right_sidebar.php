@@ -12,5 +12,6 @@
 <div id="logout_container">
 	<form action="index.php?rt=korisnik/logout" method="post">
 		<button type="submit" id="logout_button">Odjavi se</button>
-	<form>
+	</form>
 </div>
+

@@ -319,6 +319,7 @@ function main() {
 		const stock_tick = stock_tab_text_span.textContent.toLowerCase();
 		
 		setCharts(stock_tick, stock_sections, REFRESH_INTERVAL);
+		
 	}
 
 
