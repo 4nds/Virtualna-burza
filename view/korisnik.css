@@ -1,8 +1,121 @@
 body {
 	font-size: 18px;
-	background-color: rgb(191, 201, 208);
+	background-color: #F6F7F8;
 }
 
+
+#container {
+	display: grid;
+	grid-template-columns: 1fr 3fr;
+    grid-template-areas:
+		"user_and_transactions trading"
+}
+
+#user_and_transactions_container {
+	grid-area: user_and_transactions;
+}
+
+#user_container {
+	padding: 1em 0px;
+	/*grid-area: user;*/
+}
+
+#transactions_container {
+	padding: 1em 0px;
+	/*grid-area: transactions;*/
+}
+
+#trading_container {
+	grid-area: trading;
+}
+
+
+
+/* transakcije i lista */
+
+#tr_buttons {
+	display: flex;
+	gap: 2em;
+}
+
+#rank_list {
+}
+
+#transactions {
+}
+
+
+/* dionice */
+
+
+.stock_container {
+	display: grid;
+	grid-template-columns: 1fr 5fr 2fr 5fr;
+    grid-template-areas:
+		".  stock_tick  monthly_chart ."
+		".  transaction transaction   .";
+	row-gap: 1em;
+	padding: 1em 0px;
+}
+
+.stock_tick {
+	grid-area: stock_tick;
+}
+
+.monthly_chart {
+	grid-area: monthly_chart;
+}
+
+.price_container {
+	display: flex;
+	grid-area: price;
+	justify-content: center;
+	gap: 1em;
+}
+
+.quantity_container {
+	display: flex;
+	grid-area: quantity;
+	justify-content: center;
+	gap: 1em;
+}
+
+.quantity_input {
+	width: 5em;
+}
+
+.buy_container {
+	display: flex;
+	grid-area: buy;
+	justify-content: center;
+}
+
+.buy_button {
+	width: 8em;
+}
+
+.sell_container {
+	display: flex;
+	grid-area: sell;
+	justify-content: center;
+}
+
+.sell_button {
+	width: 8em;
+}
+
+.transaction_container {
+	display: grid;
+	grid-area: transaction;
+	grid-template-columns: 1fr 10em 10em 1fr;
+    grid-template-areas:
+		". quantity  quantity  ."
+		". buy    sell      .";
+	row-gap: 1em;
+}
+
+
+/*
 #stock_tabs {
 	display: flex;
 	grid-area: stock_tabs;
@@ -147,7 +260,7 @@ header {
 
 .chart_container {
 	position: relative;
-	display: inline-block; /* shrink wrap */
+	display: inline-block;
 	height: min(40vh, 50vw);
 	margin: 2vh;
 }
@@ -232,7 +345,6 @@ main {
 		". chart       ."
 		". transaction .";
 	row-gap: 2em;
-	/*background-color: red;*/
 }
 
 footer {
@@ -250,3 +362,4 @@ footer {
 	row-gap: 1em;
 }
 
+*/

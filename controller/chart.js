@@ -35,7 +35,8 @@ class GoogleStockChart {
 	
 	async getData() {
 		let data;
-		const data_array = await this.getIexPrices();
+		//const data_array = await this.getIexPrices();
+		const data_array = await this.getPrices();
 		this.data_array = data_array;
 		if (data_array) {
 			this.updateOptions(data_array);
@@ -44,49 +45,37 @@ class GoogleStockChart {
 		return data;
 	}
 	
-	async getIexPrices() {
+	async getPrices() {
 		const lower_range = this.range.toLowerCase();
-		let data_array;
+		if (! this.possible_options.includes(lower_range)) {
+			this.possible_options.push('id');
+			console.log(`Range ${this.range} is not one of options(${this.possible_options}).`);
+			return
+		}
+		
 		if (['minute', 'date'].includes(this.filter[0])) {
 			this.filter.shift();
 		}
-		if (lower_range === 'id') {
+		if (lower_range === '1d') {
 			this.filter.unshift('minute');
-			data_array = await this.getIexIntradayPrices();
 		} else {
-			if (this.possible_options.includes(lower_range)) {
-				this.filter.unshift('date');
-				data_array = await this.getIexHistoricalPrices();
-			} else {
-				this.possible_options.push('id');
-				console.log(`Range ${this.range} is not one of options(${this.possible_options}).`);
-			}
+			this.filter.unshift('date');
 		}
-		this.aproximateNullValues(data_array);
-		return data_array;
-	}
-	
-	async getIexIntradayPrices() {
-		const url = `https://sandbox.iexapis.com/stable/stock/${this.symbol}/intraday-prices?token=Tsk_846d0b9fb89741c583b142ee2f9bb434&filter=${this.filter.join(',')}&chartInterval=${this.chart_interval}`;
-		console.log(url);
-		const data_array = await this.getIexPricesFromUrl(url);
-		return data_array;
-	}
-	
-	async getIexHistoricalPrices() {
-		const url = `https://sandbox.iexapis.com/stable/stock/${this.symbol}/chart/${this.range}?token=Tsk_846d0b9fb89741c583b142ee2f9bb434&filter=${this.filter.join(',')}&chartInterval=${this.chart_interval}`;
-		console.log(url);
-		const data_array = await this.getIexPricesFromUrl(url);
-		return data_array;
-	}
-	
-	async getIexPricesFromUrl(api_url) {
-		const response = await fetch(api_url);
+		const url = 'http://localhost/Virtualna-burza/controller/stock_data.php?stock_ticks='
+			+ this.symbol + '&range=' + this.range;
+		const response = await fetch(url);
 		const raw_data = await response.json();
-		const data_array = raw_data.map(datapoint =>
+		const symbol_data = raw_data[this.symbol];
+		const data_array = symbol_data.map(datapoint =>
 			this.filter.map(key => datapoint[key]))
-		return data_array;
-	}
+		this.aproximateNullValues(data_array);
+		const data_array_with_interval = [];
+		for (let i = 0; i < data_array.length; i += this.chart_interval) {
+			data_array_with_interval.push(data_array[i]);
+		}
+		data_array_with_interval.push(data_array[data_array.length - 1]);
+		return data_array_with_interval;
+	}	
 	
 	aproximateNullValues(data_array) {
 		let i, j, start, end, range, k;

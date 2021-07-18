@@ -180,6 +180,7 @@ class DB {
 				DB::$db = new DynamicPDO($base, $user, $pass);
 				DB::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 				DB::$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+				//DB::$db->setAttribute(PDO::ATTR_FETCHES_DATETIME_TYPE, true);
 			} catch(PDOException $e) {
 				raiseErrorAndExit('PDO error', $e->getMessage());
 			}
@@ -187,5 +188,7 @@ class DB {
 		return DB::$db;
 	}
 }
+
+
 
 ?>

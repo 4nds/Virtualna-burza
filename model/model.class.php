@@ -112,14 +112,23 @@ class Model {
 		return $select_string;
 	}
 
-	public static function where($column_name, $column_value, $options = []) {			
-		$select_string = 'SELECT * FROM t:table' .
-			' WHERE c:column_name=:column_value';
-		$params = [
-			'table' => static::$table,
-			'column_name' => $column_name,
-			'column_value' => $column_value
-		];
+	public static function where($column_name, $column_value, $options = []) {
+		if (is_array($column_name) && is_array($column_value)) {
+			$column_names = $column_name;
+			$column_vales = $column_value;
+		} else {
+			$column_names = [$column_name];
+			$column_vales = [$column_value];
+		}
+		$select_string = 'SELECT * FROM t:table WHERE ';
+		$params = ['table' => static::$table];
+		$where_parts = [];
+		for ($i = 0; $i < count($column_names); $i++) {
+			$where_parts[] = sprintf('c:column_name%1$d=:column_value%1$d', $i);
+			$params[sprintf('column_name%d', $i)] = $column_names[$i];
+			$params[sprintf('column_value%d', $i)] = $column_vales[$i];
+		}
+		$select_string .= implode(' AND ', $where_parts);
 		$select_string = self::maybeAddOrderAndLimit($select_string, $params, $options);
 		$db = DB::getConnection();
 		$st = $db->dPrepare($select_string);

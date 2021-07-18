@@ -1,6 +1,7 @@
 
 <div>
-	<span><?php echo $korisnik->korisnicko_ime; ?> &#11088;<!-- rang -->1.</span>
+	<span><?php echo $korisnik->korisnicko_ime; ?> &#11088;
+		<?php echo $korisnik->rang; ?></span>
 </div>
 <table>
 	<tr>
@@ -9,15 +10,15 @@
 	</tr>
 	<tr>
 		<td>Neto vrijednost:</td>
-		<td id="net_revenue"></td>
+		<td><?php echo $neto_vrijednost; ?> kn</td>
 	</tr>
 	<tr>
 		<td>Ukupna zarada:</td>
-		<td id="total_profit"></td>
+		<td><?php echo $ukupna_zarada; ?> kn</td>
 	</tr>
 	<tr>
 		<td>Dnevna zarada:</td>
-		<td id="daily_profit"></td>
+		<td><?php echo $dnevna_zarada; ?> kn</td>
 	</tr>
 	<tr>
 		<td>Zarada od dividendi:</td>

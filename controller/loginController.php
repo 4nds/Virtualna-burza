@@ -99,7 +99,9 @@ class LoginController {
 		$korisnik = new Korisnik([
 			'korisnicko_ime' => $username,
 			'lozinka' => $hash_password,
-			'kapital' => $početni_kapital
+			'kapital' => $početni_kapital,
+			'pocetni_kapital' => $početni_kapital,
+			'zarada_od_dividendi' => 0,
 		]);
 		$inserted = $korisnik->save();
 		if ($inserted) {

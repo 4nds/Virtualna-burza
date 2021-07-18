@@ -2,7 +2,10 @@ CREATE TABLE IF NOT EXISTS vb_korisnici (
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	korisnicko_ime VARCHAR(20) NOT NULL,
 	lozinka VARCHAR(255) NOT NULL,
-	kapital INT NOT NULL
+	pocetni_kapital FLOAT NOT NULL,
+	kapital FLOAT NOT NULL,
+	zarada_od_dividendi FLOAT NOT NULL,
+	rang INT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS vb_transakcije (
@@ -11,6 +14,7 @@ CREATE TABLE IF NOT EXISTS vb_transakcije (
 	tip VARCHAR(10) NOT NULL,
 	oznaka_dionice VARCHAR(10) NOT NULL,
 	kolicina FLOAT NOT NULL,
+	vrijednost FLOAT NOT NULL,
 	vrijeme DATETIME NOT NULL/*,
 	FOREIGN KEY (korisnik_id) REFERENCES vb_korisnici(id),
 	FOREIGN KEY (oznaka_dionice) REFERENCES vb_dionice(oznaka)*/
@@ -38,9 +42,11 @@ CREATE TABLE IF NOT EXISTS vb_portfelji (
 CREATE TABLE IF NOT EXISTS vb_administratori (
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	korisnicko_ime VARCHAR(20) NOT NULL,
-	lozinka VARCHAR(255) NOT NULL,
-	pocetni_kapital INT,
-	vrijeme_postavljanja_kapitala DATETIME,
-	komisija FLOAT,
-	vrijeme_postavljanja_komisije DATETIME
+	lozinka VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS vb_postavke (
+	pocetni_kapital FLOAT NOT NULL,
+	komisija FLOAT NOT NULL,
+	vrijeme_rang_liste DATETIME NOT NULL
 );
