@@ -59,7 +59,7 @@ class GoogleStockChart {
 		} else {
 			this.filter.unshift('date');
 		}
-		const url = 'http://localhost/Virtualna-burza/controller/stock_data.php?stock_ticks='
+		const url = '../Virtualna-burza/controller/stock_data.php?stock_ticks='
 			+ this.symbol + '&range=' + this.range;
 		const response = await fetch(url);
 		const raw_data = await response.json();

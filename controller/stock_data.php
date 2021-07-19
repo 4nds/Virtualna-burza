@@ -49,7 +49,8 @@ function saveStockDataToFile($stock_tick, $range_stock_data, $range) {
 		}
 	}
 	$stock_data[$range] = $range_stock_data;
-	$bytes = file_put_contents($data_filepath, json_encode($stock_data), LOCK_EX);
+	//$bytes = file_put_contents($data_filepath, json_encode($stock_data), LOCK_EX);
+	$bytes = file_put_contents($data_filepath, json_encode($stock_data), LOCK_SH);
 	if ($bytes !== False) {
 		return true;
 	}
@@ -70,7 +71,8 @@ function updateLastPrices($last_prices) {
 	$today = new DateTime();
 	$today_string = $today->format('Y-m-d');
 	$last_prices_filepath = __DIR__  . '/../app/data/last_prices.data';
-	$bytes =  file_put_contents($last_prices_filepath, json_encode($last_prices), LOCK_EX);
+	//$bytes =  file_put_contents($last_prices_filepath, json_encode($last_prices), LOCK_EX);
+	$bytes =  file_put_contents($last_prices_filepath, json_encode($last_prices), LOCK_SH);
 	if ($bytes !== False) {
 		return true;
 	}
