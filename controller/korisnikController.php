@@ -33,6 +33,10 @@ class KorisnikController {
 		$ukupna_zarada = $neto_vrijednost - $korisnik->pocetni_kapital;
 		$dnevna_zarada = $this->getDailyProfit($korisnik);
 		$zarada_od_dividendi = $korisnik->zarada_od_dividendi;
+		$neto_vrijednost = number_format($neto_vrijednost, 2, '.', '');
+		$ukupna_zarada = number_format($ukupna_zarada, 2, '.', '');
+		$dnevna_zarada = number_format($dnevna_zarada, 2, '.', '');
+		$zarada_od_dividendi = number_format($zarada_od_dividendi, 2, '.', '');
 		$transakcije = $this->getTransactions($korisnik);
 		$lista_dionica = $this->getStockTicks($korisnik);
 		if (isset($_SESSION['transaction'])) {
@@ -183,7 +187,19 @@ class KorisnikController {
 	}
 	
 	protected function getTransactions($korisnik) {
-		$transactions = Transakcija::where('korisnik_id', $korisnik->id);
+		$db_transactions = Transakcija::where('korisnik_id', $korisnik->id);
+		$transactions = [];
+		foreach($db_transactions as $db_transaction) {
+			$time = DateTime::createFromFormat('Y-m-d H:i:s',
+				$db_transaction->vrijeme)->format('d.m.y H:i');
+			$transactions[] =[
+				'tip' => $db_transaction->tip,
+				'oznaka_dionice' => $db_transaction->oznaka_dionice,
+				'kolicina' => $db_transaction->kolicina,
+				'vrijednost' => $db_transaction->vrijednost,
+				'vrijeme' => $time
+			];
+		}
 		return $transactions;
 	}
 	
@@ -202,7 +218,7 @@ class KorisnikController {
 			if (! in_array($default_stock_ticks[$j], $stock_ticks))
 			$stock_ticks[] = $default_stock_ticks[$j];
 		}
-		$stock_ticks = array_slice($stock_ticks, 0, 2);
+		$stock_ticks = array_slice($stock_ticks, 0, 10);
 		return $stock_ticks;
 	}
 	
@@ -237,7 +253,7 @@ class KorisnikController {
 			$today_string = $today->format('Y-m-d');
 			$transakcija = new Transakcija([
 				'korisnik_id' => $korisnik->id,
-				'tip' => 'kupi',
+				'tip' => 'kupnja',
 				'oznaka_dionice' => $stock_tick,
 				'kolicina' => $quantity,
 				'vrijednost' => $price,
@@ -277,7 +293,7 @@ class KorisnikController {
 				$today_string = $today->format('Y-m-d');
 				$transakcija = new Transakcija([
 					'korisnik_id' => $korisnik->id,
-					'tip' => 'prodaj',
+					'tip' => 'prodaja',
 					'oznaka_dionice' => $stock_tick,
 					'kolicina' => $quantity,
 					'vrijednost' => $price,

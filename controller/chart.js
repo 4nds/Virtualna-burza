@@ -22,8 +22,8 @@ class GoogleStockChart {
 		this.possible_options = Array.from(this.range_map.keys());
 		this.options = {
 			title: this.chart_name,
-			legend: 'none',
-		};			
+			legend: 'none'
+		};
 	}
 
 	async draw(refresh_data = false) {
@@ -35,12 +35,10 @@ class GoogleStockChart {
 	
 	async getData() {
 		let data;
-		//const data_array = await this.getIexPrices();
-		const data_array = await this.getPrices();
-		this.data_array = data_array;
-		if (data_array) {
-			this.updateOptions(data_array);
-			data = google.visualization.arrayToDataTable(data_array, true); // Treat the first row as data.
+		this.data_array = await this.getPrices();
+		if (this.data_array) {
+			this.updateOptions();
+			data = google.visualization.arrayToDataTable(this.data_array, true); // Treat the first row as data.
 		}
 		return data;
 	}
@@ -106,16 +104,17 @@ class GoogleStockChart {
 		}
 	}
 	
-	updateOptions(data_array) {
+	updateOptions() {
 		const [vertical_minimum, vertical_maximum] = 
-			this.getChartMinAndMax(data_array);
-		this.options.vAxis = {
+			this.getChartMinAndMax(this.data_array);
+		this.options.vAxis = this.options.vAxis || {};			
+		Object.assign(this.options.vAxis, {
 			viewWindowMode: 'explicit',
 			viewWindow: {
 				min: vertical_minimum,
 				max: vertical_maximum
 			}
-		}			
+		});
 	}
 	
 	getChartMinAndMax(data_array) {
@@ -134,7 +133,6 @@ class GoogleStockChart {
 
 class StockChart {
 	
-	static uninitialized_charts = [];
 	static google_charts_loaded = false;
 	static resize_observer = new ResizeObserver(entries => {
 		if (this.resize_timer) {
@@ -147,8 +145,9 @@ class StockChart {
 		
 	});
 	
-	constructor(container, symbol, {range = 'id', interval = 1,
-			type = 'area', ratio = null, name = ''} = {}) {
+	constructor(container, symbol, {range = 'id', interval = 1, type = 'area',
+			ratio = null, name = '', hide_axis = false,
+			hide_gridlines = false, color_by_percentage = false} = {}) {
 		this.container = container;
 		this.symbol = symbol
 		this.range = range;
@@ -156,12 +155,12 @@ class StockChart {
 		this.type = type.toLowerCase();
 		this.ratio = ratio;
 		this.name = name;
+		this.hide_axis = hide_axis;
+		this.hide_gridlines = hide_gridlines;
+		this.color_by_percentage = color_by_percentage;
+		this.data_initialized = false;
 		this.setUpContainer();
-		if (StockChart.google_charts_loaded) {
-			this.initialize();
-		} else {
-			StockChart.uninitialized_charts.push(this);
-		}
+		this.initialize();
 	}
 	
 	setUpContainer() {
@@ -198,14 +197,21 @@ class StockChart {
 		
 	}
 	
-	static onGoogleChartsLoaded() {
-		StockChart.uninitialized_charts
-			.forEach(stock_chart => stock_chart.initialize());
-		StockChart.uninitialized_charts.length = 0;
-		StockChart.google_charts_loaded = true;
+	async waitGoogleChartsLoaded() {
+		if (StockChart.google_charts_loaded) {
+			return;
+		} else {
+			return new Promise((resolve, reject) => {
+				google.charts.setOnLoadCallback(() => {
+					StockChart.google_charts_loaded = true;
+					resolve();
+				});
+			})
+		}
 	}
 	
 	async initialize() {
+		await this.waitGoogleChartsLoaded();
 		if (this.type === 'area') {
 			const google_area_chart =
 				new google.visualization.AreaChart(this.inner_container);
@@ -218,21 +224,83 @@ class StockChart {
 			this.google_chart = new GoogleStockChart(google_candlestick_chart,
 				this.symbol, this.range, this.chart_interval, this.name);
 			this.google_chart.filter = ['low', 'open', 'close', 'high'];
-			this.google_chart.options.candlestick = {
-				fallingColor: {
-					strokeWidth: 0,
-					fill: '#a52714'
-				}, // red
-				risingColor: {
-					strokeWidth: 0,
-					fill: '#0f9d58'
-				} // green
-			};
+			this.google_chart.options.candlestick =
+				this.google_chart.options.candlestick || {};
+			Object.assign(this.google_chart.options.candlestick, {
+					fallingColor: {
+						strokeWidth: 0,
+						fill: '#a52714'
+					}, // red
+					risingColor: {
+						strokeWidth: 0,
+						fill: '#0f9d58'
+					} // green
+			});
 			google.visualization.events.addListener(this.google_chart.chart,
 				'ready', this.colorVerticalLines.bind(this));
 		}
-		await this.google_chart.draw();
+		if (this.hide_axis) {
+			this.google_chart.options.vAxis = 
+				this.google_chart.options.vAxis || {};
+			Object.assign(this.google_chart.options.vAxis, {
+				//textPosition: 'none',
+				ticks: []
+			});			
+			this.google_chart.options.hAxis = 
+				this.google_chart.options.hAxis || {};
+			Object.assign(this.google_chart.options.hAxis, {
+				textPosition: 'none'
+			});
+			this.google_chart.options.chartArea = 
+				this.google_chart.options.chartArea || {};
+			Object.assign(this.google_chart.options.chartArea, {
+				top: 0,
+				height: '80%'
+			});
+		}		
+		if (this.hide_gridlines) {
+			this.google_chart.options.vAxis = 
+				this.google_chart.options.vAxis || {};
+			Object.assign(this.google_chart.options.vAxis, {
+				gridlines: {
+					color: 'none'
+				}
+			});	
+		}
+		if (this.color_by_percentage) {
+			this.google_chart.data = await this.google_chart.getData();
+			this.onDataInitialized();
+			const percentage = await this.getPercentage();
+			if (percentage >= 0) {
+				this.google_chart.options.colors = ['#00BB00'];
+				//this.google_chart.options.colors = ['#34E36F'];
+			} else {
+				//this.google_chart.options.colors = ['#EE0000'];
+				this.google_chart.options.colors = ['#FF3331'];
+			}
+			await this.google_chart.draw();
+		} else {
+			await this.google_chart.draw();
+			this.onDataInitialized();
+		}		
 		StockChart.resize_observer.observe(this.container);
+	}
+	
+	onDataInitialized() {
+		this.data_initialized = true;
+	}
+	
+	async waitDataInitialized() {
+		if (this.data_initialized) {
+			return;
+		} else {
+			return new Promise((resolve, reject) => {
+				this.onDataInitialized = () => {
+					this.data_initialized = true;
+					resolve();
+				};
+			})
+		}
 	}
 	
 	colorVerticalLines() {
@@ -302,6 +370,29 @@ class StockChart {
 			await this.google_chart.draw(true);
 		}
 	}
+	
+	async getFirstPrice() {
+		await this.waitDataInitialized();
+		const first_prices = this.google_chart.data_array[0];
+		const price = first_prices[first_prices.length - 1];
+		return price;
+	}
+	
+	async getLastPrice() {
+		await this.waitDataInitialized();
+		const last = this.google_chart.data_array.length - 1;
+		const last_prices = this.google_chart.data_array[last];
+		const price = last_prices[last_prices.length - 1];
+		return price;
+	}
+	
+	async getPercentage() {
+		const first_price = await this.getFirstPrice();
+		const last_price = await this.getLastPrice();
+		const percentage = (last_price - first_price) / first_price * 100;
+		return percentage;
+	}
+	
 }
 
 google.charts.load('current', {
@@ -309,4 +400,4 @@ google.charts.load('current', {
 });
 
 
-google.charts.setOnLoadCallback(StockChart.onGoogleChartsLoaded);
+//google.charts.setOnLoadCallback(StockChart.onGoogleChartsLoaded);

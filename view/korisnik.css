@@ -1,12 +1,12 @@
 body {
-	font-size: 18px;
-	background-color: #F6F7F8;
+	font-size: 16px;
+	background-color: #F1F2F3;
 }
 
 
 #container {
 	display: grid;
-	grid-template-columns: 1fr 3fr;
+	grid-template-columns: 18em 1fr;
     grid-template-areas:
 		"user_and_transactions trading"
 }
@@ -26,9 +26,49 @@ body {
 }
 
 #trading_container {
+	display: grid;
 	grid-area: trading;
+	grid-template-columns: 2em 1fr 2em;
+	grid-template-rows: max-content max-content;
+    grid-template-areas:
+		".  search  ."
+		".  stocks  .";
+	row-gap: 1em;
+	padding-bottom: 2em;
 }
 
+/* informacije o korisniku*/
+
+#username_container {
+	display: grid;
+	grid-template-columns: max-content 1fr 7rem;
+	grid-template-areas:
+		"username  .  logout";
+	padding-left: 0.5em;
+	font-size: 1.2rem;
+}
+
+#username {
+	grid-area: username;
+}
+
+#logout_form {
+	grid-area: logout;
+}
+
+#logout_button {
+	float: right;
+	width: 7em;
+}
+
+#user_info {
+	width: 100%;
+	border-spacing: 0.5em;
+}
+
+.user_info_number {
+	text-align: right;
+}
 
 
 /* transakcije i lista */
@@ -36,330 +76,196 @@ body {
 #tr_buttons {
 	display: flex;
 	gap: 2em;
+	padding-left: 0.5em;
+}
+
+#rank_list_button {
+	width: 7em;
+}
+
+#rank_list_button:focus {
+	outline: none;
+	box-shadow: 0px 0px 0px 1px #202020;
+}
+
+#transactions_button {
+	width: 7em;
+}
+
+#transactions_button:focus {
+	outline: none;
+	box-shadow: 0px 0px 0px 1px #202020;
 }
 
 #rank_list {
 }
 
 #transactions {
+	font-size: 0.8em;
+	padding-top: 0.5em;
+	padding-left: 0.5em;
+}
+
+#transactions table {
+	width: 100%;
+	border-spacing: 0.5em;
+}
+
+.price_column {
+	text-align: right;
+}
+
+.quantity_column {
+	text-align: right;
 }
 
 
 /* dionice */
 
+#search_container {
+	display: flex;
+	grid-area: search;
+	justify-content: center;
+	align-items: center;
+}
 
-.stock_container {
+#search_input {
+	border: 1px solid #D1D2D3;
+	border-radius: 4px;
+	line-height: 1.5;
+	width: 20em;
+}
+
+#search_input:focus {
+	outline: none;
+	box-shadow: 0px 0px 0px 1px #202020;
+}
+
+#stocks_container {
 	display: grid;
-	grid-template-columns: 1fr 5fr 2fr 5fr;
-    grid-template-areas:
-		".  stock_tick  monthly_chart ."
-		".  transaction transaction   .";
+	grid-area: stocks;
+	grid-template-columns: repeat(auto-fit, minmax(20em, 1fr));
 	row-gap: 1em;
-	padding: 1em 0px;
+	column-gap: 1em;
 }
 
-.stock_tick {
+.stock_outer_container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.stock_inner_container {
+	display: grid;
+    grid-template-areas:
+		"stock_info"
+		"transaction";
+	width: 18em;
+	padding: 0.5em 1em;
+	background-color: white;
+	border: 1px solid #D1D2D3;
+	border-radius: 8px;
+}
+
+.stock_inner_container_selected {
+	box-shadow: 0px 0px 0px 1px #202020;
+	
+}
+
+.stock_info_container {
+	display: grid;
+	grid-area: stock_info;
+	grid-template-columns: 4fr 6fr 5fr;
+    grid-template-areas:
+		"stock_tick  daily_chart  stock_price"
+		".           daily_chart  stock_percentage";
+	padding-bottom: 0.5em;
+}
+
+.stock_tick_container {
+	display: flex;
 	grid-area: stock_tick;
+	align-items: center;
 }
 
-.monthly_chart {
+.daily_chart_container {
+	grid-area: daily_chart;
+}
+
+.stock_price_container {
+	display: flex;
+	grid-area: stock_price;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.stock_percentage_container {
+	display: flex;
+	grid-area: stock_percentage;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.transaction_container {
+	display: none;
+	grid-area: transaction;
+	grid-template-columns: 1fr 6em 6em 1fr;
+    grid-template-areas:
+		"monthly_chart  monthly_chart  monthly_chart   monthly_chart"
+		".  		    quantity_text  quantity_input  ."
+		".  			buy            sell			   .";
+	row-gap: 0.5em;
+	column-gap: 1em;
+	padding-top: 0.5em;
+	padding-bottom: 1em;
+}
+
+.monthly_chart_container {
 	grid-area: monthly_chart;
 }
 
-.price_container {
+.quantity_text_container {
 	display: flex;
-	grid-area: price;
-	justify-content: center;
-	gap: 1em;
+	grid-area: quantity_text;
+	justify-content: flex-end;
+	align-items: center;
 }
 
-.quantity_container {
+.quantity_text {
+	font-size: 1em;
+}
+
+.quantity_input_container {
 	display: flex;
-	grid-area: quantity;
+	grid-area: quantity_input;
 	justify-content: center;
-	gap: 1em;
+	align-items: center;
 }
 
 .quantity_input {
-	width: 5em;
+	width: 100%;
 }
 
 .buy_container {
 	display: flex;
 	grid-area: buy;
 	justify-content: center;
+	align-items: center;
 }
 
 .buy_button {
-	width: 8em;
+	width: 100%;
+	font-size: 0.8em;
 }
 
 .sell_container {
 	display: flex;
 	grid-area: sell;
 	justify-content: center;
-}
-
-.sell_button {
-	width: 8em;
-}
-
-.transaction_container {
-	display: grid;
-	grid-area: transaction;
-	grid-template-columns: 1fr 10em 10em 1fr;
-    grid-template-areas:
-		". quantity  quantity  ."
-		". buy    sell      .";
-	row-gap: 1em;
-}
-
-
-/*
-#stock_tabs {
-	display: flex;
-	grid-area: stock_tabs;
-}
-
-.stock_tab {
-	display: flex;
-	justify-content: center;
-	align-items: flex-end;
-	width: 8em;
-}
-
-.stock_tab button {
-	display: grid;
-	grid-template-columns: 1em 1fr 1em;
-	grid-template-areas:
-		".  stock_tab_text  stock_tab_exit";
-	padding-right: 0px;
-	padding-left: 0px;
-	width: 98%;
-	font-size: 1em;
-}
-
-.stock_tab_text {
-	grid-area: stock_tab_text;
-}
-
-.stock_tab_exit {
-	grid-area: stock_tab_exit;
-	color: #E81123;
-	font-size: 1em;
-}
-
-
-#search_container {
-	display: flex;
-	grid-area: search;
-	justify-content: center;
-	align-items: flex-end;
-	
-}
-
-#search_input {
-	width: 100%;
-	font-size: 1em;
-}
-
-#search_input::placeholder {
-	font-size: 0.8em;
-}
-
-header {
-	display: grid;
-	grid-area: header;
-	grid-template-columns: 1fr 8em;
-	grid-template-areas:
-		"stock_tabs  search";
-	border-bottom: 2px solid #555555;
-}
-
-#left_sidebar {
-	grid-area: left_sidebar;
-	padding-top: 1em;
-	background-color: #F1F3F4;
-}
-
-#username_container {
-	display: grid;
-	grid-area: username;
-	grid-template-areas:
-		"username_left"
-		"username_right";
-}
-
-#username_left_text {
-	grid-area: username_left;
-	font-size: 1em;
-}
-
-#username_right_text {
-	grid-area: username_right;
-	font-size: 1em;
-	text-align: right;
-}
-
-#capital_container {
-	display: grid;
-	grid-area: capital;
-	grid-template-areas:
-		"capital_left"
-		"capital_right";
-}
-
-#capital_left_text {
-	grid-area: capital_left;
-	font-size: 1em;
-}
-
-#capital_right_text{
-	grid-area: capital_right;
-	font-size: 1em;
-	text-align: right;	
-}
-
-#logout_container {
-	display: flex;
-	grid-area: logout;
-	justify-content: center;
-	align-items: flex-end;
-}
-
-#logout_container form {
-	min-width: 90%;
-}
-
-#logout_button {
-	width: 100%;
-	font-size: 1em;
-
-}
-
-#right_sidebar {
-	display: grid;
-	grid-area: right_sidebar;
-	grid-template-columns: 1em 8em 1em;
-	grid-template-rows: 3em 3em 3em;
-	grid-template-areas:
-		".  username  ."
-		".  capital   ."
-		".  logout    .";
-	padding-top: 1em;
-	background-color: #F1F3F4;
-	
-}
-
-.charts {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
 	align-items: center;
 }
 
-.chart_container {
-	position: relative;
-	display: inline-block;
-	height: min(40vh, 50vw);
-	margin: 2vh;
+.sell_button {
+	width: 100%;
+	font-size: 0.8em;
 }
-
-.year_chart_container > img {
-	height: 62.5%;
-}
-
-.month_chart_container > img {
-	height: 50%;
-}
-
-.day_chart_container > img {
-	height: 75%;
-}
-
-.chart {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-}
-
-#stock_chart_container {
-	grid-area: chart;
-}
-
-#price_container {
-	display: flex;
-	grid-area: price;
-	justify-content: center;
-	gap: 1em;
-}
-
-#quantity_container {
-	display: flex;
-	grid-area: quantity;
-	justify-content: center;
-	gap: 1em;
-}
-
-#quantity_input {
-	width: 5em;
-}
-
-#buy_container {
-	display: flex;
-	grid-area: buy;
-	justify-content: center;
-}
-
-#buy_button {
-	width: 8em;
-}
-
-#sell_container {
-	display: flex;
-	grid-area: sell;
-	justify-content: center;
-}
-
-#sell_button {
-	width: 8em;
-}
-
-#transaction_container {
-	display: grid;
-	grid-area: transaction;
-	grid-template-columns: 1fr 10em 10em 1fr;
-    grid-template-areas:
-		". price  quantity  ."
-		". buy    sell      .";
-	row-gap: 1em;
-}
-
-main {
-	display: grid;
-	grid-area: content;
-	grid-template-columns: 1fr minmax(min-content, 1000px) 1fr;
-	grid-template-areas:
-		". chart       ."
-		". transaction .";
-	row-gap: 2em;
-}
-
-footer {
-	grid-area: footer;
-	height: 5em;
-}
-
-#container {
-	display: grid;
-	grid-template-columns: 10em 1fr 10em;
-    grid-template-areas:
-		".            header   ."
-		"left_sidebar content  right_sidebar"
-		".            footer   .";
-	row-gap: 1em;
-}
-
-*/

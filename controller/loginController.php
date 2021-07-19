@@ -38,19 +38,19 @@ class LoginController {
 	
 	public function loginFailed() {
 		$css_link = 'view/login.css';
-		$failure_message  = 'Korisničko ime ili lozinka nisu ispravni.';
+		$error_message  = 'Korisničko ime ili lozinka nisu ispravni.';
 		require_once __DIR__ . '/../view/login_failed.php';
 	}
 	
 	public function signupFailed() {
 		$css_link = 'view/login.css';
-		$failure_message  = 'Registracija nije bila uspješna.';
+		$error_message  = 'Registracija nije bila uspješna.';
 		require_once __DIR__ . '/../view/login_failed.php';
 	}
 	
 	public function signupFailedUsernameTaken() {
 		$css_link = 'view/login.css';
-		$failure_message  = 'Uneseno korisničko ime već postoji.';
+		$error_message  = 'Uneseno korisničko ime već postoji.';
 		require_once __DIR__ . '/../view/login_failed.php';
 	}
 	
