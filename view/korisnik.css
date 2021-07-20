@@ -6,46 +6,66 @@ body {
 
 #container {
 	display: grid;
-	grid-template-columns: 18em 1fr;
+	grid-template-columns:20rem 1fr;
     grid-template-areas:
 		"user_and_transactions trading"
 }
 
 #user_and_transactions_container {
+	display: grid;
 	grid-area: user_and_transactions;
+	grid-template-areas:
+		"."
+		"user"
+		"transactions";
+	grid-template-rows: 2rem max-content max-content;
+	row-gap: 1rem;	
 }
 
 #user_container {
-	padding: 1em 0px;
-	/*grid-area: user;*/
+	grid-area: user;
+	padding: 1rem 0px;
+	padding-top: 1rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	padding-bottom: 0.5rem;
+	background-color: white;
+	border: 1px solid #D1D2D3;
+	border-radius: 8px;
 }
 
 #transactions_container {
-	padding: 1em 0px;
-	/*grid-area: transactions;*/
+	grid-area: transactions;
+	padding: 1rem 0px;
+	padding-top: 1rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	padding-bottom: 0.5rem;
+	background-color: white;
+	border: 1px solid #D1D2D3;
+	border-radius: 8px;
 }
 
 #trading_container {
 	display: grid;
 	grid-area: trading;
-	grid-template-columns: 2em 1fr 2em;
+	grid-template-columns: 2rem 1fr 2rem;
 	grid-template-rows: max-content max-content;
     grid-template-areas:
 		".  search  ."
 		".  stocks  .";
-	row-gap: 1em;
-	padding-bottom: 2em;
+	row-gap: 1rem;
+	padding-bottom: 2rem;
 }
 
 /* informacije o korisniku*/
 
 #username_container {
 	display: grid;
-	grid-template-columns: max-content 1fr 7rem;
+	grid-template-columns: 0.5rem max-content 1fr 7rem 0.5rem;
 	grid-template-areas:
-		"username  .  logout";
-	padding-left: 0.5em;
-	font-size: 1.2rem;
+		". username  .  logout .";
+	font-size: 1.4rem;
 }
 
 #username {
@@ -58,12 +78,12 @@ body {
 
 #logout_button {
 	float: right;
-	width: 7em;
+	width: 7rem;
 }
 
 #user_info {
 	width: 100%;
-	border-spacing: 0.5em;
+	border-spacing: 0.5rem;
 }
 
 .user_info_number {
@@ -74,13 +94,15 @@ body {
 /* transakcije i lista */
 
 #tr_buttons {
-	display: flex;
-	gap: 2em;
-	padding-left: 0.5em;
+	display: grid;
+	grid-template-columns: 0.5rem 7rem 1fr 7rem 0.5rem;
+	grid-template-areas:
+		".  rank_list_button  .  transactions_button  .";
 }
 
 #rank_list_button {
-	width: 7em;
+	grid-area: rank_list_button;
+	width: 7rem;
 }
 
 #rank_list_button:focus {
@@ -89,7 +111,8 @@ body {
 }
 
 #transactions_button {
-	width: 7em;
+	grid-area: transactions_button;
+	width: 7rem;
 }
 
 #transactions_button:focus {
@@ -98,17 +121,18 @@ body {
 }
 
 #rank_list {
+	padding: 0px 0.5rem;
 }
 
 #transactions {
-	font-size: 0.8em;
-	padding-top: 0.5em;
-	padding-left: 0.5em;
+	font-size: 0.8rem;
+	padding-top: 0.5rem;
+	padding-left: 0.5rem;
 }
 
 #transactions table {
 	width: 100%;
-	border-spacing: 0.5em;
+	border-spacing: 0.5rem;
 }
 
 .price_column {
@@ -133,7 +157,9 @@ body {
 	border: 1px solid #D1D2D3;
 	border-radius: 4px;
 	line-height: 1.5;
-	width: 20em;
+	width: 19.6rem;
+	padding: 0.2rem;
+	font-size: 1rem;
 }
 
 #search_input:focus {
@@ -144,9 +170,9 @@ body {
 #stocks_container {
 	display: grid;
 	grid-area: stocks;
-	grid-template-columns: repeat(auto-fit, minmax(20em, 1fr));
-	row-gap: 1em;
-	column-gap: 1em;
+	grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+	row-gap: 1rem;
+	column-gap: 1rem;
 }
 
 .stock_outer_container {
@@ -160,8 +186,8 @@ body {
     grid-template-areas:
 		"stock_info"
 		"transaction";
-	width: 18em;
-	padding: 0.5em 1em;
+	width: 18rem;
+	padding: 0.5rem 1rem;
 	background-color: white;
 	border: 1px solid #D1D2D3;
 	border-radius: 8px;
@@ -179,7 +205,7 @@ body {
     grid-template-areas:
 		"stock_tick  daily_chart  stock_price"
 		".           daily_chart  stock_percentage";
-	padding-bottom: 0.5em;
+	padding-bottom: 0.5rem;
 }
 
 .stock_tick_container {
@@ -209,14 +235,14 @@ body {
 .transaction_container {
 	display: none;
 	grid-area: transaction;
-	grid-template-columns: 1fr 6em 6em 1fr;
+	grid-template-columns: 1fr 6rem 6rem 1fr;
     grid-template-areas:
 		".  		    quantity_text  quantity_input  ."
 		".  			buy            sell			   .";
-	row-gap: 0.5em;
-	column-gap: 1em;
-	padding-top: 0.5em;
-	padding-bottom: 1em;
+	row-gap: 0.5rem;
+	column-gap: 1rem;
+	padding-top: 0.5rem;
+	padding-bottom: 1rem;
 }
 
 .quantity_text_container {
@@ -227,7 +253,7 @@ body {
 }
 
 .quantity_text {
-	font-size: 1em;
+	font-size: 1rem;
 }
 
 .quantity_input_container {
@@ -250,7 +276,7 @@ body {
 
 .buy_button {
 	width: 100%;
-	font-size: 0.8em;
+	font-size: 0.8rem;
 }
 
 .sell_container {
@@ -262,5 +288,5 @@ body {
 
 .sell_button {
 	width: 100%;
-	font-size: 0.8em;
+	font-size: 0.8rem;
 }

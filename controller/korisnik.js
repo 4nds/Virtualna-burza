@@ -214,7 +214,8 @@ main();
 
 
 function showTransactionContainer(stock_outer_container) {
-	const stock_inner_container = stock_outer_container.childNodes[0];
+	const stock_inner_container = stock_outer_container
+		.querySelector('.stock_inner_container');
 	const transaction_container = stock_inner_container
 		.querySelector('.transaction_container');
 	stock_inner_container.classList.add('stock_inner_container_selected');
@@ -223,7 +224,8 @@ function showTransactionContainer(stock_outer_container) {
 }
 
 function hideTransactionContainer(stock_outer_container) {
-	const stock_inner_container = stock_outer_container.childNodes[0];
+	const stock_inner_container = stock_outer_container
+		.querySelector('.stock_inner_container');
 	const transaction_container = stock_inner_container
 		.querySelector('.transaction_container');
 	stock_inner_container.classList.remove('stock_inner_container_selected');
