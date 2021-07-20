@@ -24,9 +24,6 @@
 				</div>
 			</div>
 			<div class="transaction_container">
-				<div class="monthly_chart_container">
-					<div class="monthly_chart", data-stock_tick="<?php echo $oznaka_dionice; ?>"></div>
-				</div>
 				<div class="quantity_text_container">
 					<div class="quantity_text">Količina:</div>
 				</div>

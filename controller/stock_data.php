@@ -6,11 +6,30 @@ require_once __DIR__ . '/../model/transakcija.class.php';
 require_once __DIR__ . '/../app/debug.php';
 // require_once __DIR__ . '/../data';
 
+function getCurrentTime() {
+	$today = new DateTime();
+	$x = $today->sub(new DateInterval('PT11H'));
+	return $today;
+}
 
 function getApiStockDataUrl($stock_tick, $range) {
 	$chart_interval = '1';
-	$filter = $range === '1d' ? 'minute' : 'date';
-	$data_url = 'https://sandbox.iexapis.com/stable/stock/' . $stock_tick
+	$filter = in_array($range, ['1d', 'lfd']) ? 'minute' : 'date';
+	if ($range === 'lfd') {
+		$new_york_datetime = new DateTime('now',
+			new DateTimeZone('America/New_York') );
+		if ($new_york_datetime->format('H') <= '16' 
+				&& $new_york_datetime->format('N') <= 5) {
+			$today = getCurrentTime();
+			$yesterday = $today->sub(new DateInterval('P1D'));
+			$yesterday_string = $yesterday->format('Ymd');
+			$range = 'date/' . $yesterday_string;
+		} else {
+			$today = getCurrentTime();
+			$range = '1d';
+		}
+	}
+	$data_url = 'https://sandbox.iexapis.com/stable/stock/' . $stock_tick	
 		. '/chart/' . $range . '?token=Tsk_846d0b9fb89741c583b142ee2f9bb434'
 		. '&filter=' . $filter . ',low,open,close,high'
 		. '&chartInterval=' . $chart_interval;
@@ -20,7 +39,17 @@ function getApiStockDataUrl($stock_tick, $range) {
 function getApiStockData($stock_tick, $range) {
 	$data_url = getApiStockDataUrl($stock_tick, $range);
 	$data_json = file_get_contents($data_url);
-	$stock_data = json_decode($data_json, true);
+	$stock_data = false;
+	if ($data_json !== false) {
+		$stock_data = json_decode($data_json, true);
+	} else if ($range === 'lfd') {
+		$range = '1d';
+		$data_url = getApiStockDataUrl($stock_tick, $range);		
+		$data_json = file_get_contents($data_url);
+		if ($data_json !== false) {
+			$stock_data = json_decode($data_json, true);
+		}
+	}
 	return $stock_data;
 }
 
@@ -68,8 +97,6 @@ function getLastPrices() {
 }
 
 function updateLastPrices($last_prices) {
-	$today = new DateTime();
-	$today_string = $today->format('Y-m-d');
 	$last_prices_filepath = __DIR__  . '/../app/data/last_prices.data';
 	//$bytes =  file_put_contents($last_prices_filepath, json_encode($last_prices), LOCK_EX);
 	$bytes =  file_put_contents($last_prices_filepath, json_encode($last_prices), LOCK_SH);
@@ -83,15 +110,20 @@ function getStockData($stock_ticks, $range) {
 	if (empty($stock_ticks)) {
 		return [];
 	}
-	$today = new DateTime();
+	$today = getCurrentTime();
 	$today_string = $today->format('Y-m-d');
 	$last_prices = getLastPrices();
+	$data_range = $range === 'lfd' ? '1d' : $range;
 	$database_stock_prices = [];
 	$used_stock_ticks = [];
+	foreach($stock_ticks as &$stock_tick) {
+		$stock_tick = strtoupper($stock_tick);
+	}
+	
 	foreach($stock_ticks as $stock_tick) {
 		if ($last_prices !== False && array_key_exists($stock_tick, $last_prices)
-				&& $last_prices[$stock_tick]['updated'] == $today_string) {
-			$stock_data = getStockDataFromFile($stock_tick, $range);
+				&& $last_prices[$stock_tick]['updated'] === $today_string) {
+			$stock_data = getStockDataFromFile($stock_tick, $data_range);
 			if ($stock_data !== False) {
 				$database_stock_prices[$stock_tick] = $stock_data;
 				$used_stock_ticks[] = $stock_tick;
@@ -103,7 +135,8 @@ function getStockData($stock_ticks, $range) {
 		if (! array_key_exists($stock_tick, $database_stock_prices)) {
 			$stock_data = getApiStockData($stock_tick, $range);
 			if ($stock_data !== False) {
-				saveStockDataToFile($stock_tick, $stock_data, $range);
+				
+				saveStockDataToFile($stock_tick, $stock_data, $data_range);
 				$last_price = $stock_data[count($stock_data) - 1]['close'];
 				$last_prices[$stock_tick] = [
 					'last_price' => $last_price,
@@ -135,7 +168,7 @@ function getStockData($stock_ticks, $range) {
 						}
 					}
 				}
-				$stock_data = getStockDataFromFile($closest_tick, $range);
+				$stock_data = getStockDataFromFile($closest_tick, $data_range);
 				$database_stock_prices[$stock_tick] = $stock_data;
 				$used_stock_ticks[] = $closest_tick;
 
@@ -144,7 +177,33 @@ function getStockData($stock_ticks, $range) {
 		}
 	}
 	updateLastPrices($last_prices);
+	if ($range === 'lfd') {
+		$current_minute = $today->format('H:i');
+		foreach ($database_stock_prices as $stock_tick => &$stock_data) {
+			$i = 0;
+			$stock_data_length = count($stock_data);
+			while ($i < $stock_data_length 
+					&& $stock_data[$i]['minute'] <= $current_minute) {
+				$i++;
+			}
+			$stock_data = array_slice($stock_data, 0, $i);
+		}
+	}	
 	return $database_stock_prices;
+}
+
+function checkInput($stock_ticks, $range) {
+	$possible_range_options = ['5y', '2y', '1y', '6m', '3m',
+		'1m', '5d', '1d', 'lfd', 'id'];
+	if (! in_array($range, $possible_range_options)) {
+		return false;
+	}
+	foreach ($stock_ticks as $stock_tick) {
+		if (strlen($stock_tick) > 10 || ! ctype_alpha($stock_tick)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 
@@ -156,8 +215,12 @@ if (isset($_GET['stock_ticks']) && isset($_GET['range'])) {
 	header('Content-type: application/json');
 	$stock_ticks = explode(',', $_GET['stock_ticks']);
 	$range = $_GET['range'];
-	$stock_prices = getStockData($stock_ticks, $range);
-	echo json_encode($stock_prices);
+	if (checkInput($stock_ticks, $range)) {
+		$stock_prices = getStockData($stock_ticks, $range);
+		echo json_encode($stock_prices);
+	} else {
+		echo json_encode(['Error' => 'Wrong input format.']);
+	}
 }
 
 

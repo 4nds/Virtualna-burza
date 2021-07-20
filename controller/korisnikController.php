@@ -62,7 +62,7 @@ class KorisnikController {
 		foreach ($user_stocks as $stock_tick => $quantity) {
 			$user_stock_ticks[] = $stock_tick;
 		}
-		$stock_prices = getStockData($user_stock_ticks, '1d');
+		$stock_prices = getStockData($user_stock_ticks, 'lfd');
 		$stocks_value = 0;
 		foreach ($user_stocks as $stock_tick => $quantity) {
 			$price = end($stock_prices[$stock_tick])['close'];
@@ -96,7 +96,7 @@ class KorisnikController {
 		foreach ($daily_transactions as $transaction) {
 			$transaction_stock_ticks[] = $transaction['oznaka_dionice'];
 		}
-		$stock_prices = getStockData($transaction_stock_ticks, '1d');
+		$stock_prices = getStockData($transaction_stock_ticks, 'lfd');
 		$daily_profit = 0;
 		foreach($daily_transactions as $transaction) {
 			$tick = $transaction['oznaka_dionice'];
@@ -204,21 +204,25 @@ class KorisnikController {
 	}
 	
 	protected function getStockTicks($korisnik) {
+		$MAX_STOCKS_NUM = 10;
 		$user_stocks = $this->getUserStocks($korisnik);
 		$user_stock_ticks = [];
 		foreach ($user_stocks as $stock_tick => $quantity) {
 			$user_stock_ticks[] = $stock_tick;
 		}
-		$stock_ticks = array_slice($user_stock_ticks, 0, 20);
+		$stock_ticks = array_slice($user_stock_ticks, 0, $MAX_STOCKS_NUM);
 		$default_stock_ticks = ['AAPL', 'MSFT', 'AMZN', 'FB', 'GOOG',
 			'TSLA', 'NVDA', 'JPM', 'JNJ', 'V', 'UNH', 'PYPL', 'HD', 'MA',
 			'DIS', 'BAC', 'ADBE', 'CMCSA', 'XOM', 'NFLX'];
 		;
-		for ($i = count($user_stock_ticks), $j = 0; $i < 20; $i++, $j++) {
-			if (! in_array($default_stock_ticks[$j], $stock_ticks))
-			$stock_ticks[] = $default_stock_ticks[$j];
+		$user_stocks_len = count($user_stock_ticks);
+		for ($i = $user_stocks_len, $j = 0; $i < $MAX_STOCKS_NUM; $j++) {
+			if (! in_array($default_stock_ticks[$j], $stock_ticks)) {
+				$stock_ticks[] = $default_stock_ticks[$j];
+				$i++;
+			}
 		}
-		$stock_ticks = array_slice($stock_ticks, 0, 10);
+		$stock_ticks = array_slice($stock_ticks, 0, $MAX_STOCKS_NUM);
 		return $stock_ticks;
 	}
 	
@@ -246,6 +250,7 @@ class KorisnikController {
 	}
 	
 	protected function buy($stock_tick, $quantity, $price) {
+		$stock_tick = strtoupper($stock_tick);
 		$username = $this->checkLogin();
 		$korisnik = Korisnik::where('korisnicko_ime', $username, ['limit' => 1])[0];
 		if ($korisnik->kapital > $quantity * $price) {
@@ -283,6 +288,7 @@ class KorisnikController {
 	
 	protected function sell($stock_tick, $quantity, $price) {
 		$username = $this->checkLogin();
+		$stock_tick = strtoupper($stock_tick);
 		$korisnik = Korisnik::where('korisnicko_ime', $username, ['limit' => 1])[0];
 		$portfelji = Portfelj::where(['korisnik_id', 'oznaka_dionice'],
 			[$korisnik->id, $stock_tick], ['limit' => 1]);
@@ -312,10 +318,8 @@ class KorisnikController {
 	
 	public function transaction() {
 		if(isset($_POST['kupi'])) {
-			
 			$bought = $this->buy($_POST['oznaka_dionice'],
 				$_POST['kolicina'], $_POST['cijena']);
-			pprint(['transaction' => ['buy', $bought]], ['name', 'json']);
 			$_SESSION['transaction'] = json_encode(['buy', $bought]);
 			header('Location: index.php?rt=korisnik');
 		} else if(isset($_POST['prodaj'])) {

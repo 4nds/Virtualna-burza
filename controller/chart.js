@@ -4,22 +4,11 @@ class GoogleStockChart {
 	
 	constructor(google_chart, symbol, range, chart_interval, chart_name) {
 		this.chart = google_chart;
-		this.symbol = symbol;
+		this.symbol = symbol.toUpperCase();
 		this.range = range;
 		this.chart_interval = chart_interval;
 		this.chart_name = chart_name;
-		this.range_map = new Map([
-			['5y', 'five years'],
-			['2y', 'two years'],
-			['1y', 'year'],
-			['6m', 'six months'],
-			['3m', 'three months'],
-			['1m', 'month'],
-			['5d', 'five days'],
-			['1d', 'day'],
-			['id', 'day']
-		]);
-		this.possible_options = Array.from(this.range_map.keys());
+		this.possible_options = ['5y', '2y', '1y', '6m', '3m', '1m', '5d', '1d', 'lfd', 'id'];
 		this.options = {
 			title: this.chart_name,
 			legend: 'none'
@@ -54,15 +43,17 @@ class GoogleStockChart {
 		if (['minute', 'date'].includes(this.filter[0])) {
 			this.filter.shift();
 		}
-		if (lower_range === '1d') {
+		if (['1d', 'lfd', 'id'].includes(lower_range)) {
 			this.filter.unshift('minute');
 		} else {
 			this.filter.unshift('date');
 		}
 		const url = '../Virtualna-burza/controller/stock_data.php?stock_ticks='
 			+ this.symbol + '&range=' + this.range;
+		//console.log(url);
 		const response = await fetch(url);
 		const raw_data = await response.json();
+		
 		const symbol_data = raw_data[this.symbol];
 		const data_array = symbol_data.map(datapoint =>
 			this.filter.map(key => datapoint[key]))
@@ -79,7 +70,7 @@ class GoogleStockChart {
 		let i, j, start, end, range, k;
 		for (let col = 1; col < data_array[0].length; col++) {
 			i = 0;
-			while (i < data_array.length && ! data_array[i][col]) {
+			while (i < data_array.length && data_array[i][col]) {
 				i++;
 			}
 			while (i < data_array.length) {
@@ -89,7 +80,15 @@ class GoogleStockChart {
 					while (end < data_array.length && ! data_array[end][col]) {
 						end++;
 					}
-					if (end < data_array.length) {
+					if (start < 0) {
+						for (j = 0; j < end; j++) {
+							data_array[j][col] = data_array[end][col];
+						}
+					} else if (end >= data_array.length) {
+						for (j = start + 1; j < end; j++) {
+							data_array[j][col] = data_array[start][col];
+						}
+					} else {
 						range = end - start;
 						for (j = start + 1; j < end; j++) {
 							k = (j - start) / range;
@@ -99,7 +98,7 @@ class GoogleStockChart {
 					}
 					i = end;
 				}
-				i++
+				i++;
 			}
 		}
 	}
@@ -149,7 +148,7 @@ class StockChart {
 			ratio = null, name = '', hide_axis = false,
 			hide_gridlines = false, color_by_percentage = false} = {}) {
 		this.container = container;
-		this.symbol = symbol
+		this.symbol = symbol.toUpperCase();
 		this.range = range;
 		this.chart_interval = interval;
 		this.type = type.toLowerCase();
@@ -350,8 +349,8 @@ class StockChart {
 	
 	async refresh({symbol, range , interval, name} = {}) {
 		if (symbol) {
-			this.symbol = symbol;
-			this.google_chart.symbol = symbol;
+			this.symbol = symbol.toUpperCase();
+			this.google_chart.symbol = symbol.toUpperCase();
 		}
 		if (range) {
 			this.range = range;

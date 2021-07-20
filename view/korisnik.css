@@ -211,17 +211,12 @@ body {
 	grid-area: transaction;
 	grid-template-columns: 1fr 6em 6em 1fr;
     grid-template-areas:
-		"monthly_chart  monthly_chart  monthly_chart   monthly_chart"
 		".  		    quantity_text  quantity_input  ."
 		".  			buy            sell			   .";
 	row-gap: 0.5em;
 	column-gap: 1em;
 	padding-top: 0.5em;
 	padding-bottom: 1em;
-}
-
-.monthly_chart_container {
-	grid-area: monthly_chart;
 }
 
 .quantity_text_container {
