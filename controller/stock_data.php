@@ -7,8 +7,9 @@ require_once __DIR__ . '/../app/debug.php';
 // require_once __DIR__ . '/../data';
 
 function getCurrentTime() {
-	$today = new DateTime();
-	$x = $today->sub(new DateInterval('PT15H'));
+	//$today = new DateTime();
+	$today = new DateTime('now', new DateTimeZone('Europe/Zagreb'));
+	//$x = $today->sub(new DateInterval('PT15H'));
 	return $today;
 }
 
@@ -17,7 +18,7 @@ function getApiStockDataUrl($stock_tick, $range) {
 	$filter = in_array($range, ['1d', 'lfd']) ? 'minute' : 'date';
 	if ($range === 'lfd') {
 		$new_york_datetime = new DateTime('now',
-			new DateTimeZone('America/New_York') );
+			new DateTimeZone('America/New_York'));
 		if ($new_york_datetime->format('H') <= '16' 
 				&& $new_york_datetime->format('N') <= 5) {
 			$today = getCurrentTime();
@@ -120,6 +121,7 @@ function getStockData($stock_ticks, $range) {
 		$stock_ticks[$i] = strtoupper($stock_ticks[$i]);
 	}
 	foreach($stock_ticks as $stock_tick) {
+		
 		if ($last_prices !== False && array_key_exists($stock_tick, $last_prices)
 				&& $last_prices[$stock_tick]['updated'] === $today_string) {
 			$stock_data = getStockDataFromFile($stock_tick, $data_range);
@@ -130,6 +132,7 @@ function getStockData($stock_ticks, $range) {
 			
 		}
 	}
+	
 	foreach($stock_ticks as $stock_tick) {
 		if (! array_key_exists($stock_tick, $database_stock_prices)) {
 			$stock_data = getApiStockData($stock_tick, $range);

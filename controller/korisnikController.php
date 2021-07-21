@@ -81,7 +81,8 @@ class KorisnikController {
 	protected function getDailyTransactions($korisnik) {
 		$transactions = Transakcija::where('korisnik_id', $korisnik->id);
 		$daily_transactions = [];
-		$today = new DateTime();
+		//$today = new DateTime();
+		$today = new DateTime('now', new DateTimeZone('Europe/Zagreb'));
 		$today_string = $today->format('Y-m-d');
 		foreach ($transactions as $transaction) {
 			if (substr($transaction->vrijeme, 0, 10) === $today_string) {
@@ -129,7 +130,8 @@ class KorisnikController {
 	
 	protected function getRankList() {
 		$postavke = Postavke::all(['limit' => 1])[0];
-		$today = new DateTime();
+		//$today = new DateTime();
+		$today = new DateTime('now', new DateTimeZone('Europe/Zagreb'));
 		$today_string = $today->format('Y-m-d');
 		if (substr($postavke->vrijeme_rang_liste, 0, 10) !== $today_string) {
 			$this->setRankList($postavke);
@@ -197,7 +199,8 @@ class KorisnikController {
 			$korisnik->save();
 			$i++;
 		}
-		$today = new DateTime();
+		//$today = new DateTime();
+		$today = new DateTime('now', new DateTimeZone('Europe/Zagreb'));
 		$postavke->vrijeme_rang_liste = $today->format('Y-m-d H:i:s');
 		$postavke->save();
 	}
@@ -276,7 +279,8 @@ class KorisnikController {
 		$postavke = Postavke::all(['limit' => 1])[0];
 		$price += $price * $postavke->komisija;
 		if ($korisnik->kapital > $quantity * $price) {
-			$today = new DateTime();
+			//$today = new DateTime();
+			$today = new DateTime('now', new DateTimeZone('Europe/Zagreb'));
 			$today_string = $today->format('Y-m-d H:i:s');
 			$transakcija = new Transakcija([
 				'korisnik_id' => $korisnik->id,
@@ -316,10 +320,11 @@ class KorisnikController {
 			[$korisnik->id, $stock_tick], ['limit' => 1]);
 		if (! empty($portfelji)) {
 			$portfelj = $portfelji[0];
-			if ($portfelj->kolicina > $quantity) {
+			if ($portfelj->kolicina >= $quantity) {
 				$postavke = Postavke::all(['limit' => 1])[0];
 				$price -= $price * $postavke->komisija;
-				$today = new DateTime();
+				//$today = new DateTime();
+				$today = new DateTime('now', new DateTimeZone('Europe/Zagreb'));
 				$today_string = $today->format('Y-m-d H:i:s');
 				$transakcija = new Transakcija([
 					'korisnik_id' => $korisnik->id,

@@ -264,6 +264,7 @@ stocks_container.addEventListener('click', event => {
 	const transaction_container = event.target.closest('.transaction_container');
 	const buy_button = event.target.closest('.buy_button');
 	const sell_button = event.target.closest('.sell_button');
+	console.log(transaction_container);
 	if (buy_button || sell_button) {
 		//const submit_button = buy_button || sell_button;
 		const quantity_input = stock_inner_container

@@ -50,7 +50,7 @@ class GoogleStockChart {
 		}
 		const url = '../Virtualna-burza/controller/stock_data.php?stock_ticks='
 			+ this.symbol + '&range=' + this.range;
-		//console.log(url);
+		console.log(url);
 		const response = await fetch(url);
 		const raw_data = await response.json();
 		
