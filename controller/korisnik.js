@@ -1,4 +1,12 @@
+
+const rank_list_div = document.querySelector('#rank_list');
+const transactions_div = document.querySelector('#transactions'); 
+const rank_list_button = document.querySelector('#rank_list_button');
+const transactions_button = document.querySelector('#transactions_button');	
 	
+	
+
+//console.log(PHP_VARIABLES);
 if ('transaction' in PHP_VARIABLES) {
 	const transaction_info = PHP_VARIABLES['transaction'];
 	if (transaction_info[1]) {
@@ -12,24 +20,33 @@ if ('transaction' in PHP_VARIABLES) {
 	}
 }
 
+if ('rt_chooser' in PHP_VARIABLES) {
+	const rt_chooser = PHP_VARIABLES['rt_chooser'];
+	if (rt_chooser === 'rang_lista') {
+		rank_list_button.style.boxShadow = '0px 0px 0px 1px #202020';
+		transactions_div.style.display = 'none';
+	} else if (rt_chooser === 'transakcije') {
+		transactions_button.style.boxShadow = '0px 0px 0px 1px #202020';
+		rank_list_div.style.display = 'none';
+	}
+} else {
+	rank_list_button.style.boxShadow = '0px 0px 0px 1px #202020';
+	transactions_div.style.display = 'none';
+}
 
 
-
-
-const rank_list_div = document.querySelector('#rank_list');
-const transactions_div = document.querySelector('#transactions'); 
-const rank_list_button = document.querySelector('#rank_list_button');
-const transactions_button = document.querySelector('#transactions_button');
-rank_list_button.focus();
-transactions_div.style.display = 'none';
 
 rank_list_button.addEventListener('click', event => {
 	transactions_div.style.display = 'none';
+	transactions_button.style.boxShadow = '';
+	rank_list_button.style.boxShadow = '0px 0px 0px 1px #202020';
 	rank_list_div.style.display = '';
 });
 
 transactions_button.addEventListener('click', event => {
 	rank_list_div.style.display = 'none';
+	rank_list_button.style.boxShadow = '';
+	transactions_button.style.boxShadow = '0px 0px 0px 1px #202020';
 	transactions_div.style.display = '';
 });
 
@@ -37,9 +54,7 @@ transactions_button.addEventListener('click', event => {
 
 
 
-//
-async function addStockInfo(stock_info_div) {
-	const daily_chart_div = stock_info_div.querySelector('.daily_chart');
+async function setPriceAndPercentage(stock_info_div, stock_chart) {
 	const stock_price_container = stock_info_div
 		.querySelector('.stock_price_container');
 	const stock_price_div = stock_price_container
@@ -47,18 +62,30 @@ async function addStockInfo(stock_info_div) {
 	const form_price_input = stock_price_container.querySelector('input');
 	const stock_percentage_div = stock_info_div
 		.querySelector('.stock_percentage');
-	const stock_chart = new StockChart(daily_chart_div, daily_chart_div.dataset.stock_tick,
-		{range: 'lfd', interval: 10, type: 'area', ratio: 1.5, name: '',
-		 hide_axis: true, hide_gridlines : true, color_by_percentage: true});
 	const last_price = await stock_chart.getLastPrice();
 	const percentage = await stock_chart.getPercentage();
-	stock_price_div.textContent = `${last_price} kn`;
+	stock_price_div.textContent = `${last_price.toFixed(2)} kn`;
 	form_price_input.value = last_price;
 	stock_percentage_div.textContent = `${percentage.toFixed(2)} %`;
 	stock_percentage_div.style.color = 
 		//percentage >= 0 ? '#34E36F' : '#FF6341';
 		//percentage >= 0 ? '#00BB00' : '#EE0000';
 		percentage >= 0 ? '#00BB00' : '#FF0000';
+}
+
+
+async function addStockInfo(stock_info_div) {
+	const REFRESH_INTERVAL = 60;
+	const daily_chart_div = stock_info_div.querySelector('.daily_chart');
+	const stock_chart = new StockChart(daily_chart_div,
+		daily_chart_div.dataset.stock_tick, {range: 'lfd', interval: 10,
+		type: 'area', ratio: 1.5, name: '', hide_gridlines : true,
+		hide_axis: true, color_by_percentage: true, refresh_interval: 60});
+	await setPriceAndPercentage(stock_info_div, stock_chart);
+	window.setInterval(async () => {
+		await stock_chart.refresh();
+		await setPriceAndPercentage(stock_info_div, stock_chart);
+	}, REFRESH_INTERVAL * 1000);
 }
 
 
@@ -193,7 +220,6 @@ search_input.addEventListener('keyup', event => {
 		}
 	}
 });
-//
 
 
 
@@ -235,7 +261,29 @@ function hideTransactionContainer(stock_outer_container) {
 
 stocks_container.addEventListener('click', event => {
 	const stock_inner_container = event.target.closest('.stock_inner_container');
-	if (stock_inner_container) {
+	const transaction_container = event.target.closest('.transaction_container');
+	const buy_button = event.target.closest('.buy_button');
+	const sell_button = event.target.closest('.sell_button');
+	if (buy_button || sell_button) {
+		//const submit_button = buy_button || sell_button;
+		const quantity_input = stock_inner_container
+			.querySelector('.quantity_input');
+		if (! Number(quantity_input.value) > 0) {
+			window.alert('Transakcija se ne može provesti:\nTrebate unijeti pozitivni broj za količinu dionice.')
+			event.preventDefault();
+		} else {
+			let rt_input =  stock_inner_container
+				.querySelector('input[name=rang_lista_ili_transakcije]');
+			if (!rt_input) {
+				rt_input = document.createElement('input');
+				rt_input.type = 'hidden';
+				rt_input.name = 'rang_lista_ili_transakcije';
+				stock_inner_container.append(rt_input);
+			}
+			rt_input.value = rank_list_div.style.display !== 'none'
+				? 'rang_lista' : 'transakcije';
+		}
+	} else if (stock_inner_container && ! transaction_container) {
 		const stock_outer_container = stock_inner_container.parentNode;
 		const transaction_container = stock_inner_container
 			.querySelector('.transaction_container');
@@ -257,8 +305,4 @@ stocks_container.addEventListener('click', event => {
 //console.log(stock_container);
 //stock_container.classList.add('stock_inner_container_selected')
 //transaction_container.style.display = 'grid';
-
-
-
-
 

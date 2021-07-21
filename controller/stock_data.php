@@ -8,7 +8,7 @@ require_once __DIR__ . '/../app/debug.php';
 
 function getCurrentTime() {
 	$today = new DateTime();
-	$x = $today->sub(new DateInterval('PT11H'));
+	$x = $today->sub(new DateInterval('PT15H'));
 	return $today;
 }
 
@@ -116,10 +116,9 @@ function getStockData($stock_ticks, $range) {
 	$data_range = $range === 'lfd' ? '1d' : $range;
 	$database_stock_prices = [];
 	$used_stock_ticks = [];
-	foreach($stock_ticks as &$stock_tick) {
-		$stock_tick = strtoupper($stock_tick);
+	for ($i = 0; $i < count($stock_ticks); $i++) {
+		$stock_ticks[$i] = strtoupper($stock_ticks[$i]);
 	}
-	
 	foreach($stock_ticks as $stock_tick) {
 		if ($last_prices !== False && array_key_exists($stock_tick, $last_prices)
 				&& $last_prices[$stock_tick]['updated'] === $today_string) {
@@ -188,7 +187,7 @@ function getStockData($stock_ticks, $range) {
 			}
 			$stock_data = array_slice($stock_data, 0, $i);
 		}
-	}	
+	}
 	return $database_stock_prices;
 }
 

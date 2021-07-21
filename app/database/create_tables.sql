@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS vb_transakcije (
 
 CREATE TABLE IF NOT EXISTS vb_dionice (
 	oznaka VARCHAR(10) NOT NULL PRIMARY KEY,
-	ime VARCHAR(20) NOT NULL,
+	ime VARCHAR(100) NOT NULL,
 	opis TEXT,
 	dividenda FLOAT,
 	postavljac_dividende INT,
@@ -48,5 +48,6 @@ CREATE TABLE IF NOT EXISTS vb_administratori (
 CREATE TABLE IF NOT EXISTS vb_postavke (
 	pocetni_kapital FLOAT NOT NULL,
 	komisija FLOAT NOT NULL,
-	vrijeme_rang_liste DATETIME NOT NULL
+	vrijeme_rang_liste DATETIME NOT NULL,
+	PRIMARY KEY (pocetni_kapital, komisija)
 );

@@ -145,8 +145,8 @@ class StockChart {
 	});
 	
 	constructor(container, symbol, {range = 'id', interval = 1, type = 'area',
-			ratio = null, name = '', hide_axis = false,
-			hide_gridlines = false, color_by_percentage = false} = {}) {
+			ratio = null, name = '', hide_axis = false, hide_gridlines = false,
+			color_by_percentage = false} = {}) {
 		this.container = container;
 		this.symbol = symbol.toUpperCase();
 		this.range = range;

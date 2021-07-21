@@ -107,7 +107,6 @@ body {
 
 #rank_list_button:focus {
 	outline: none;
-	box-shadow: 0px 0px 0px 1px #202020;
 }
 
 #transactions_button {
@@ -117,7 +116,6 @@ body {
 
 #transactions_button:focus {
 	outline: none;
-	box-shadow: 0px 0px 0px 1px #202020;
 }
 
 #rank_list {

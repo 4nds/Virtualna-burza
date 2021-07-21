@@ -9,6 +9,7 @@ require_once __DIR__ . '/../app/database/db.class.php';
 require_once __DIR__ . '/../app/debug.php';
 require_once __DIR__ . '/../model/korisnik.class.php';
 require_once __DIR__ . '/../model/administrator.class.php';
+require_once __DIR__ . '/../model/postavke.class.php';
 
 
 
@@ -88,20 +89,15 @@ class LoginController {
 			$this->signupFailedUsernameTaken();
 			return;
 		}
-		$administratori = Administrator::all([
-			'order by' => 'vrijeme_postavljanja_kapitala',
-			'limit' => 1
-		]);
-		$početni_kapital = Administrator::$DEFAULT_POCETNI_KAPITAL;
-		if (count($administratori) > 0) {
-			$početni_kapital = $administratori[0]->pocetni_kapital;
-		}				
+		$postavke = Postavke::all(['limit' => 1])[0];
+		$pocetni_kapital = $postavke->pocetni_kapital;			
 		$korisnik = new Korisnik([
 			'korisnicko_ime' => $username,
 			'lozinka' => $hash_password,
-			'kapital' => $početni_kapital,
-			'pocetni_kapital' => $početni_kapital,
+			'kapital' => $pocetni_kapital,
+			'pocetni_kapital' => $pocetni_kapital,
 			'zarada_od_dividendi' => 0,
+			'rang' => 0
 		]);
 		$inserted = $korisnik->save();
 		if ($inserted) {

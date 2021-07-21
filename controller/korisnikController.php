@@ -29,6 +29,7 @@ class KorisnikController {
 			'controller/chart.js',
 			'controller/korisnik.js'
 		];
+		$php_variables = [];
 		$neto_vrijednost = $this->getNetRevenue($korisnik);
 		$ukupna_zarada = $neto_vrijednost - $korisnik->pocetni_kapital;
 		$dnevna_zarada = $this->getDailyProfit($korisnik);
@@ -40,10 +41,15 @@ class KorisnikController {
 		$transakcije = $this->getTransactions($korisnik);
 		$lista_dionica = $this->getStockTicks($korisnik);
 		if (isset($_SESSION['transaction'])) {
-			$php_variables = json_encode(
-				['transaction' => json_decode($_SESSION['transaction'])]);
+			$php_variables['transaction'] = 
+				json_decode($_SESSION['transaction']);
 			unset($_SESSION['transaction']);
 		}
+		if (isset($_SESSION['rt_chooser'])) {
+			$php_variables['rt_chooser'] = $_SESSION['rt_chooser'];
+			unset($_SESSION['rt_chooser']);
+		}
+		$php_variables = json_encode($php_variables);
 		require_once __DIR__ . '/../view/korisnik_index.php';
 	}	
 	
@@ -118,7 +124,7 @@ class KorisnikController {
 	}
 	
 	protected static function compareByNetValue($korisnik1, $korisnik2) {
-		return $korisnik1[1] - $korisnik2[1];
+		return $korisnik2[1] - $korisnik1[1];
 	}
 	
 	protected function getRankList() {
@@ -126,9 +132,16 @@ class KorisnikController {
 		$today = new DateTime();
 		$today_string = $today->format('Y-m-d');
 		if (substr($postavke->vrijeme_rang_liste, 0, 10) !== $today_string) {
-			$this->setRankList();
+			$this->setRankList($postavke);
 		}
 		$korisnici = Korisnik::all();
+		foreach ($korisnici as $korisnik) {
+			if ($korisnik->rang === 0) {
+				$this->setRankList($postavke);
+				$korisnici = Korisnik::all();
+				break;
+			}
+		}
 		usort($korisnici, array('KorisnikController', 'compareByRank'));
 		$rank_list = [];
 		foreach ($korisnici as $korisnik) {
@@ -161,7 +174,7 @@ class KorisnikController {
 		return $net_value;
 	}
 	
-	protected function setRankList() {
+	protected function setRankList($postavke) {
 		$korisnici = Korisnik::all();
 		$portfelji = Portfelj::all();
 		$stock_prices = [];
@@ -184,10 +197,14 @@ class KorisnikController {
 			$korisnik->save();
 			$i++;
 		}
+		$today = new DateTime();
+		$postavke->vrijeme_rang_liste = $today->format('Y-m-d H:i:s');
+		$postavke->save();
 	}
 	
 	protected function getTransactions($korisnik) {
-		$db_transactions = Transakcija::where('korisnik_id', $korisnik->id);
+		$db_transactions = Transakcija::where('korisnik_id', $korisnik->id,
+			['desc order by' => 'vrijeme']);
 		$transactions = [];
 		foreach($db_transactions as $db_transaction) {
 			$time = DateTime::createFromFormat('Y-m-d H:i:s',
@@ -196,7 +213,7 @@ class KorisnikController {
 				'tip' => $db_transaction->tip,
 				'oznaka_dionice' => $db_transaction->oznaka_dionice,
 				'kolicina' => $db_transaction->kolicina,
-				'vrijednost' => $db_transaction->vrijednost,
+				'vrijednost' => number_format($db_transaction->vrijednost, 2, '.', ''),
 				'vrijeme' => $time
 			];
 		}
@@ -204,7 +221,7 @@ class KorisnikController {
 	}
 	
 	protected function getStockTicks($korisnik) {
-		$MAX_STOCKS_NUM = 10;
+		$MAX_STOCKS_NUM = 14;
 		$user_stocks = $this->getUserStocks($korisnik);
 		$user_stock_ticks = [];
 		foreach ($user_stocks as $stock_tick => $quantity) {
@@ -212,8 +229,11 @@ class KorisnikController {
 		}
 		$stock_ticks = array_slice($user_stock_ticks, 0, $MAX_STOCKS_NUM);
 		$default_stock_ticks = ['AAPL', 'MSFT', 'AMZN', 'FB', 'GOOG',
-			'TSLA', 'NVDA', 'JPM', 'JNJ', 'V', 'UNH', 'PYPL', 'HD', 'MA',
-			'DIS', 'BAC', 'ADBE', 'CMCSA', 'XOM', 'NFLX'];
+			'TSLA', 'NVDA', 'JPM', 'JNJ', 'V', 'PYPL', 'MA', 'DIS',
+			'ADBE', 'NFLX', 'INTC', 'KO', 'NKE', 'COST', 'MCD', 'ORCL',
+			'SBUX', 'IBM', 'GS', 'BA', 'CVS', 'AMD', 'GE', 'BKNG',
+			'FDX', 'ATVI', 'GM', 'ADSK', 'TWTR', 'F', 'EBAY', 'SPG',
+			'YUM', 'HPQ', 'HLT', 'WHR'];
 		;
 		$user_stocks_len = count($user_stock_ticks);
 		for ($i = $user_stocks_len, $j = 0; $i < $MAX_STOCKS_NUM; $j++) {
@@ -253,9 +273,11 @@ class KorisnikController {
 		$stock_tick = strtoupper($stock_tick);
 		$username = $this->checkLogin();
 		$korisnik = Korisnik::where('korisnicko_ime', $username, ['limit' => 1])[0];
+		$postavke = Postavke::all(['limit' => 1])[0];
+		$price += $price * $postavke->komisija;
 		if ($korisnik->kapital > $quantity * $price) {
 			$today = new DateTime();
-			$today_string = $today->format('Y-m-d');
+			$today_string = $today->format('Y-m-d H:i:s');
 			$transakcija = new Transakcija([
 				'korisnik_id' => $korisnik->id,
 				'tip' => 'kupnja',
@@ -295,8 +317,10 @@ class KorisnikController {
 		if (! empty($portfelji)) {
 			$portfelj = $portfelji[0];
 			if ($portfelj->kolicina > $quantity) {
+				$postavke = Postavke::all(['limit' => 1])[0];
+				$price -= $price * $postavke->komisija;
 				$today = new DateTime();
-				$today_string = $today->format('Y-m-d');
+				$today_string = $today->format('Y-m-d H:i:s');
 				$transakcija = new Transakcija([
 					'korisnik_id' => $korisnik->id,
 					'tip' => 'prodaja',
@@ -321,11 +345,17 @@ class KorisnikController {
 			$bought = $this->buy($_POST['oznaka_dionice'],
 				$_POST['kolicina'], $_POST['cijena']);
 			$_SESSION['transaction'] = json_encode(['buy', $bought]);
+			if (isset($_POST['rang_lista_ili_transakcije'])) {
+				$_SESSION['rt_chooser'] = $_POST['rang_lista_ili_transakcije'];
+			}
 			header('Location: index.php?rt=korisnik');
 		} else if(isset($_POST['prodaj'])) {
 			$sold = $this->sell($_POST['oznaka_dionice'],
 				$_POST['kolicina'], $_POST['cijena']);
 			$_SESSION['transaction'] = json_encode(['sell', $sold]);
+			if (isset($_POST['rang_lista_ili_transakcije'])) {
+				$_SESSION['rt_chooser'] = $_POST['rang_lista_ili_transakcije'];
+			}
 			header('Location: index.php?rt=korisnik');
 		}
 	}
